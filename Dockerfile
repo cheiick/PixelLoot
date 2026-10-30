@@ -19,16 +19,18 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 WORKDIR /var/www/html
 COPY . .
 
-# Installation Node + Build Vite
-RUN npm install \
+# Build Vite + CORRECTION manifest
+RUN rm -rf node_modules public/build \
+    && npm install \
     && npm run build \
+    && cp public/build/.vite/manifest.json public/build/manifest.json \
     && composer install --no-dev --optimize-autoloader \
     && php artisan config:clear \
     && php artisan route:clear \
     && php artisan view:clear \
     && chown -R www-data:www-data storage bootstrap/cache public/build
 
-# Vérifier que le build existe
+# Vérification
 RUN ls -la public/build/
 
 EXPOSE 80
