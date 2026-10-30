@@ -23,7 +23,7 @@ COPY . .
 RUN rm -rf node_modules public/build \
     && npm install \
     && npm run build \
-    && cp public/build/.vite/manifest.json public/build/manifest.json
+    && test -f public/build/manifest.json || (echo "⚠️ manifest.json introuvable" && ls -la public/build/) \
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist \
     && php artisan config:clear \
