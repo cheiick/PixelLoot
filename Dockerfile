@@ -1,10 +1,10 @@
 FROM php:8.3-apache
 
-# Extensions PHP
+# Extensions PHP (ajout de intl et zip pour les emails)
 RUN apt-get update && apt-get install -y \
-    git unzip libpq-dev libpng-dev libjpeg-dev libfreetype6-dev libicu-dev nodejs npm \
+    git unzip libpq-dev libpng-dev libjpeg-dev libfreetype6-dev libicu-dev libzip-dev nodejs npm \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_pgsql pdo_mysql gd intl \
+    && docker-php-ext-install pdo pdo_pgsql pdo_mysql gd intl zip \
     && a2enmod rewrite
 
 # Composer
@@ -19,19 +19,17 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 WORKDIR /var/www/html
 COPY . .
 
-# Build Vite + CORRECTION manifest
+# Build Vite + Composer (séparé pour mieux voir les erreurs)
 RUN rm -rf node_modules public/build \
     && npm install \
     && npm run build \
-    && cp public/build/.vite/manifest.json public/build/manifest.json \
-    && composer install --no-dev --optimize-autoloader \
+    && cp public/build/.vite/manifest.json public/build/manifest.json
+
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist \
     && php artisan config:clear \
     && php artisan route:clear \
     && php artisan view:clear \
     && chown -R www-data:www-data storage bootstrap/cache public/build
-
-# Vérification
-RUN ls -la public/build/
 
 EXPOSE 80
 
