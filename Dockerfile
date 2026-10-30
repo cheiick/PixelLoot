@@ -1,5 +1,7 @@
 FROM php:8.3-apache
 
+ENV APP_ENV=production APP_DEBUG=false
+
 # Extensions PHP + libwebp-dev pour le support WebP
 RUN apt-get update && apt-get install -y \
     git unzip libpq-dev libpng-dev libjpeg-dev libfreetype6-dev libicu-dev libzip-dev libwebp-dev \
@@ -17,6 +19,7 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 
 # Code
 WORKDIR /var/www/html
+COPY docker/php-uploads.ini /usr/local/etc/php/conf.d/99-uploads.ini
 COPY . .
 
 # Composer uniquement (build Vite déjà fait en local)
@@ -28,13 +31,8 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-di
 
 EXPOSE 80
 
-# Démarrage avec migrations
-RUN echo '#!/bin/bash\n\
-php artisan migrate --force\n\
-php artisan config:cache\n\
-php artisan route:cache\n\
-php artisan view:cache\n\
-apache2-foreground' > /start.sh \
-    && chmod +x /start.sh
+COPY docker/entrypoint.sh /usr/local/bin/render-entrypoint
+RUN chmod +x /usr/local/bin/render-entrypoint
 
-CMD ["/start.sh"]
+ENTRYPOINT ["render-entrypoint"]
+CMD ["apache2-foreground"]

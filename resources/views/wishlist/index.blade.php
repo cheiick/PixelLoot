@@ -14,7 +14,7 @@
                     <article class="overflow-hidden rounded-xl bg-white shadow dark:bg-slate-900">
                         <a href="{{ route('products.show', $product) }}">
                             @if($product->image_path)
-                                <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->name }}" class="aspect-square w-full object-cover">
+                                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($product->image_path) }}" alt="{{ $product->name }}" class="aspect-square w-full object-cover">
                             @elseif($product->image_url)
                                 <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="aspect-square w-full object-cover">
                             @else

@@ -39,7 +39,7 @@
             <div>
                 <a href="/">
                     @if($siteSettings->get('site_logo'))
-                        <img src="{{ asset('storage/' . $siteSettings->get('site_logo')) }}" alt="{{ $siteSettings->get('site_name', 'MonShop') }}" class="max-h-20 max-w-48 object-contain">
+                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($siteSettings->get('site_logo')) }}" alt="{{ $siteSettings->get('site_name', 'MonShop') }}" class="max-h-20 max-w-48 object-contain">
                     @else
                         <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
                     @endif

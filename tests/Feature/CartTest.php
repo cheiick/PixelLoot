@@ -60,6 +60,25 @@ it('displays the uploaded product image in the cart', function () {
         ->assertSee('alt="Casque audio"', false);
 });
 
+it('generates public image URLs from the configured S3-compatible storage', function () {
+    config([
+        'filesystems.disks.public' => [
+            'driver' => 's3',
+            'key' => 'test-key',
+            'secret' => 'test-secret',
+            'region' => 'us-east-1',
+            'bucket' => 'monshop',
+            'url' => 'https://images.example.com',
+            'endpoint' => null,
+            'use_path_style_endpoint' => false,
+        ],
+    ]);
+    Storage::forgetDisk('public');
+
+    expect(Storage::disk('public')->url('products/casque.webp'))
+        ->toBe('https://images.example.com/products/casque.webp');
+});
+
 it('applies an active coupon to a cart that meets its minimum purchase', function () {
     Coupon::create([
         'code' => 'WELCOME10',
@@ -146,6 +165,29 @@ it('adds from product pages and updates cart quantities without a page reload', 
         ->assertSee('data-quantity-change', false)
         ->assertSee('data-cart-total', false)
         ->assertSee('aria-label="Voir mon panier"', false);
+});
+
+it('generates secure same-origin cart URLs behind a forwarded HTTPS proxy', function () {
+    $category = Category::create([
+        'name' => 'Électronique',
+        'slug' => 'electronique',
+    ]);
+
+    $product = Product::create([
+        'category_id' => $category->id,
+        'name' => 'Casque audio',
+        'slug' => 'casque-audio',
+        'price' => 49.90,
+        'stock' => 4,
+    ]);
+
+    $this->withHeaders([
+        'X-Forwarded-Proto' => 'https',
+        'X-Forwarded-Host' => 'shop.example.com',
+    ])
+        ->get(route('products.show', $product))
+        ->assertOk()
+        ->assertSee('action="https://shop.example.com/cart/add/'.$product->id.'"', false);
 });
 
 it('removes a product from the cart', function () {

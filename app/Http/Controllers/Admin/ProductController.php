@@ -84,16 +84,17 @@ class ProductController extends Controller
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240', 'dimensions:max_width=10000,max_height=10000'],
         ]);
 
+        $previousImagePath = null;
         if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($product->image_path) {
-                Storage::disk('public')->delete($product->image_path);
-            }
+            $previousImagePath = $product->image_path;
             $path = app(UploadedImageOptimizer::class)->storeWebp($request->file('image'), 'products');
             $data['image_path'] = $path;
         }
 
         $product->update($data);
+        if ($previousImagePath) {
+            Storage::disk('public')->delete($previousImagePath);
+        }
         Cache::forget('storefront.catalog.facets');
 
         return redirect()->route('admin.products.index')->with('success', 'Produit mis à jour avec succès.');

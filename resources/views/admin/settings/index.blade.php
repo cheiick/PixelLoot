@@ -50,7 +50,7 @@
                 <input type="file" id="site_logo" name="site_logo" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="w-full border rounded px-3 py-2">
                 @if($settings['site_logo'])
                     <div class="mt-3 flex items-center gap-4">
-                        <img src="{{ asset('storage/' . $settings['site_logo']) }}" alt="Logo actuel du site" class="max-h-16 max-w-48 object-contain">
+                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($settings['site_logo']) }}" alt="Logo actuel du site" class="max-h-16 max-w-48 object-contain">
                         <label class="flex items-center gap-2 text-sm">
                             <input type="checkbox" name="remove_site_logo" value="1">
                             Supprimer le logo actuel
@@ -73,11 +73,11 @@
             <div>
                 <label for="hero_images" class="block text-sm font-medium mb-1">Images du banner (1 à 5 images, PNG, JPG ou WebP, 10 Mo maximum par image)</label>
                 <input type="file" id="hero_images" name="hero_images[]" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple class="w-full border rounded px-3 py-2">
-                <p class="mt-1 text-sm text-gray-600">Sélectionner de nouvelles images remplace la galerie actuelle. Elles défileront automatiquement toutes les 5 secondes.</p>
+                <p class="mt-1 text-sm text-gray-600">10 Mo maximum par image et 50 Mo au total. Sélectionner de nouvelles images remplace la galerie actuelle. Elles défileront automatiquement toutes les 5 secondes.</p>
                 @if(count($settings['hero_images']) > 0)
                     <div class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3">
                         @foreach($settings['hero_images'] as $image)
-                            <img src="{{ asset('storage/' . $image) }}" alt="Image actuelle du banner" class="h-32 w-full rounded-lg object-cover">
+                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($image) }}" alt="Image actuelle du banner" class="h-32 w-full rounded-lg object-cover">
                         @endforeach
                     </div>
                     <div class="mt-3">

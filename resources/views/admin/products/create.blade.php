@@ -44,8 +44,9 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium mb-1">Image depuis le PC</label>
-            <input type="file" name="image" accept="image/*" class="w-full border rounded px-3 py-2">
+            <label class="block text-sm font-medium mb-1">Image depuis le PC (10 Mo maximum)</label>
+            <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="w-full border rounded px-3 py-2">
+            <p class="mt-1 text-xs text-gray-500">Formats acceptés : JPG, PNG ou WebP. L’image sera redimensionnée et convertie en WebP.</p>
         </div>
 
         <div>

@@ -5,7 +5,7 @@
 @section('meta_description', \Illuminate\Support\Str::limit(strip_tags($product->description ?: 'Découvrez '.$product->name.' dans notre boutique.'), 160))
 @section('og_type', 'product')
 @if($product->image_path || $product->image_url)
-    @section('meta_image', $product->image_path ? asset('storage/'.$product->image_path) : $product->image_url)
+    @section('meta_image', $product->image_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($product->image_path) : $product->image_url)
 @endif
 
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
@@ -31,7 +31,7 @@
             <div class="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
                 <div class="relative aspect-square bg-gray-50">
                     @if($product->image_path)
-                        <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->name }}" fetchpriority="high" class="h-full w-full object-contain p-6 sm:p-10">
+                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($product->image_path) }}" alt="{{ $product->name }}" fetchpriority="high" class="h-full w-full object-contain p-6 sm:p-10">
                     @elseif($product->image_url)
                         <img src="{{ $product->image_url }}" alt="{{ $product->name }}" fetchpriority="high" class="h-full w-full object-contain p-6 sm:p-10">
                     @else
@@ -202,7 +202,7 @@
     '@type' => 'Product',
     'name' => $product->name,
     'description' => \Illuminate\Support\Str::limit(strip_tags($product->description ?? ''), 500),
-    'image' => $product->image_path ? asset('storage/'.$product->image_path) : $product->image_url,
+    'image' => $product->image_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($product->image_path) : $product->image_url,
     'brand' => $product->brand ? ['@type' => 'Brand', 'name' => $product->brand] : null,
     'offers' => [
         '@type' => 'Offer',

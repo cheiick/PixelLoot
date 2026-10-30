@@ -73,7 +73,7 @@
         <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
             <a href="{{ route('home') }}" class="flex min-w-0 shrink-0 items-center gap-2 font-bold text-xl tracking-tight">
                 @if($siteSettings->get('site_logo'))
-                    <img src="{{ asset('storage/' . $siteSettings->get('site_logo')) }}" alt="{{ $siteSettings->get('site_name', 'MonShop') }}" class="max-h-10 max-w-36 object-contain sm:max-h-14 sm:max-w-48 lg:max-h-16 lg:max-w-64">
+                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($siteSettings->get('site_logo')) }}" alt="{{ $siteSettings->get('site_name', 'MonShop') }}" class="max-h-10 max-w-36 object-contain sm:max-h-14 sm:max-w-48 lg:max-h-16 lg:max-w-64">
                 @else
                     <span class="max-w-36 truncate sm:max-w-56">{{ $siteSettings->get('site_name', 'MonShop') }}</span><span class="-ml-2 text-blue-500">.</span>
                 @endif
@@ -213,7 +213,7 @@
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
                 @if($siteSettings->get('site_logo'))
-                    <img src="{{ asset('storage/' . $siteSettings->get('site_logo')) }}" alt="{{ $siteSettings->get('site_name', 'MonShop') }}" class="max-h-10 max-w-40 object-contain mb-4">
+                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($siteSettings->get('site_logo')) }}" alt="{{ $siteSettings->get('site_name', 'MonShop') }}" class="max-h-10 max-w-40 object-contain mb-4">
                 @else
                     <h2 class="text-white text-lg font-bold mb-4">{{ $siteSettings->get('site_name', 'MonShop') }}</h2>
                 @endif
@@ -321,7 +321,14 @@
             };
 
             const sendCartRequest = async (url, method, data) => {
-                const response = await fetch(url, {
+                const requestUrl = new URL(url, window.location.href);
+                if (requestUrl.origin !== window.location.origin) {
+                    throw new Error('L’URL du panier ne correspond pas au domaine actuel. Vérifiez APP_URL dans Render.');
+                }
+
+                let response;
+                try {
+                    response = await fetch(requestUrl, {
                     method,
                     headers: {
                         'Accept': 'application/json',
@@ -330,11 +337,28 @@
                         'X-Requested-With': 'XMLHttpRequest',
                     },
                     body: JSON.stringify(data),
-                });
-                const result = await response.json();
+                    });
+                } catch {
+                    throw new Error('Connexion au panier impossible. Vérifiez que APP_URL utilise l’URL HTTPS de Render et réessayez.');
+                }
+
+                const responseBody = await response.text();
+                let result = {};
+                try {
+                    result = responseBody ? JSON.parse(responseBody) : {};
+                } catch {
+                    if (response.status === 413) {
+                        throw new Error('La requête est trop volumineuse. Réduisez la taille des fichiers envoyés.');
+                    }
+                    throw new Error(`Le serveur a répondu avec une page non JSON (HTTP ${response.status}). Consultez les journaux Render.`);
+                }
 
                 if (!response.ok) {
-                    throw new Error(result.message || Object.values(result.errors || {}).flat()[0] || 'Une erreur est survenue.');
+                    throw new Error(result.message || Object.values(result.errors || {}).flat()[0] || `Erreur HTTP ${response.status}.`);
+                }
+
+                if (typeof result.cart_count !== 'number') {
+                    throw new Error('Réponse inattendue du serveur pour la mise à jour du panier.');
                 }
 
                 return result;
