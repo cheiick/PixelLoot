@@ -18,7 +18,8 @@ class StripeCheckoutGateway
         string $cancelUrl,
         ?Coupon $coupon = null,
         float $discount = 0,
-        string $currency = 'EUR'
+        string $currency = 'EUR',
+        ?int $orderId = null
     ): string {
         $secret = config('services.stripe.secret');
 
@@ -51,6 +52,8 @@ class StripeCheckoutGateway
             'line_items' => $lineItems,
             'success_url' => $successUrl,
             'cancel_url' => $cancelUrl,
+            'client_reference_id' => $orderId ? (string) $orderId : null,
+            'metadata' => $orderId ? ['order_id' => (string) $orderId] : [],
         ];
 
         if ($discounts) {

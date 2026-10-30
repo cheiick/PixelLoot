@@ -10,7 +10,7 @@ export default defineConfig({
     ],
     // Configuration pour production
     build: {
-        manifest: true,
+        manifest: 'manifest.json',
         outDir: 'public/build',
     },
 });

@@ -90,6 +90,56 @@
             </div>
         </fieldset>
 
+        <fieldset class="border-b pb-6 space-y-4">
+            <legend class="text-lg font-semibold mb-3">E-mails de commande (SMTP)</legend>
+            <p class="text-sm text-gray-600">
+                Configurez un fournisseur SMTP, par exemple le SMTP de Brevo (offre gratuite soumise aux limites du fournisseur), ou celui de votre choix.
+                Après confirmation du paiement Stripe, le client reçoit le détail de sa commande et son statut. Les changements de statut dans le panel envoient également un e-mail.
+                Les identifiants sont chiffrés en base et le mot de passe n’est jamais réaffiché.
+            </p>
+            <label class="flex items-center gap-2 text-sm font-medium">
+                <input type="hidden" name="mail_enabled" value="0">
+                <input type="checkbox" name="mail_enabled" value="1" @checked(old('mail_enabled', $settings['mail_enabled']) === '1')>
+                Activer l’envoi des e-mails
+            </label>
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="mail_smtp_host" class="block text-sm font-medium mb-1">Serveur SMTP</label>
+                    <input type="text" id="mail_smtp_host" name="mail_smtp_host" value="{{ old('mail_smtp_host', $settings['mail_smtp_host']) }}" placeholder="smtp-relay.brevo.com" maxlength="255" class="w-full border rounded px-3 py-2">
+                </div>
+                <div>
+                    <label for="mail_smtp_port" class="block text-sm font-medium mb-1">Port SMTP</label>
+                    <input type="number" id="mail_smtp_port" name="mail_smtp_port" value="{{ old('mail_smtp_port', $settings['mail_smtp_port']) }}" min="1" max="65535" class="w-full border rounded px-3 py-2">
+                </div>
+                <div>
+                    <label for="mail_smtp_encryption" class="block text-sm font-medium mb-1">Chiffrement</label>
+                    <select id="mail_smtp_encryption" name="mail_smtp_encryption" class="w-full border rounded px-3 py-2">
+                        <option value="tls" @selected(old('mail_smtp_encryption', $settings['mail_smtp_encryption']) === 'tls')>TLS (recommandé, port 587)</option>
+                        <option value="ssl" @selected(old('mail_smtp_encryption', $settings['mail_smtp_encryption']) === 'ssl')>SSL (généralement port 465)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="mail_smtp_username" class="block text-sm font-medium mb-1">Identifiant SMTP</label>
+                    <input type="text" id="mail_smtp_username" name="mail_smtp_username" value="{{ old('mail_smtp_username', $settings['mail_smtp_username']) }}" maxlength="255" autocomplete="off" class="w-full border rounded px-3 py-2">
+                </div>
+                <div>
+                    <label for="mail_smtp_password" class="block text-sm font-medium mb-1">Mot de passe / clé SMTP</label>
+                    <input type="password" id="mail_smtp_password" name="mail_smtp_password" maxlength="4096" autocomplete="new-password" placeholder="{{ $settings['mail_password_configured'] ? 'Déjà configuré — vide pour le conserver' : 'Saisir le mot de passe SMTP' }}" class="w-full border rounded px-3 py-2">
+                    @if($settings['mail_password_configured'])
+                        <p class="mt-1 text-xs text-green-700">Un identifiant secret est enregistré.</p>
+                    @endif
+                </div>
+                <div>
+                    <label for="mail_from_address" class="block text-sm font-medium mb-1">Adresse expéditrice autorisée</label>
+                    <input type="email" id="mail_from_address" name="mail_from_address" value="{{ old('mail_from_address', $settings['mail_from_address']) }}" maxlength="255" class="w-full border rounded px-3 py-2">
+                </div>
+                <div>
+                    <label for="mail_from_name" class="block text-sm font-medium mb-1">Nom de l’expéditeur</label>
+                    <input type="text" id="mail_from_name" name="mail_from_name" value="{{ old('mail_from_name', $settings['mail_from_name']) }}" maxlength="255" class="w-full border rounded px-3 py-2">
+                </div>
+            </div>
+        </fieldset>
+
         <div>
             <label class="block text-sm font-medium mb-1">Email de contact (footer)</label>
             <input type="email" name="footer_email" value="{{ old('footer_email', $settings['footer_email']) }}" required class="w-full border rounded px-3 py-2">
@@ -125,6 +175,21 @@
         </fieldset>
 
         <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Enregistrer</button>
+    </form>
+
+    @if(session('mail_test_success'))
+        <div class="mt-4 rounded border border-green-300 bg-green-50 px-4 py-3 text-green-800">{{ session('mail_test_success') }}</div>
+    @endif
+    @if(session('mail_test_error'))
+        <div class="mt-4 rounded border border-red-300 bg-red-50 px-4 py-3 text-red-800">{{ session('mail_test_error') }}</div>
+    @endif
+    <form action="{{ route('admin.settings.test-mail') }}" method="POST" class="mt-4 flex flex-wrap items-end gap-3 rounded bg-white p-4 shadow">
+        @csrf
+        <div class="min-w-64 flex-1">
+            <label for="mail_test_email" class="mb-1 block text-sm font-medium">Adresse de réception pour le test</label>
+            <input type="email" id="mail_test_email" name="mail_test_email" value="{{ old('mail_test_email') }}" required maxlength="255" class="w-full rounded border px-3 py-2">
+        </div>
+        <button type="submit" class="rounded bg-slate-700 px-4 py-2 text-white hover:bg-slate-800">Envoyer un e-mail de test</button>
     </form>
 </div>
 <script>

@@ -20,6 +20,13 @@ class Order extends Model
         'address',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'customer_status_emailed_at' => 'datetime',
+        ];
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

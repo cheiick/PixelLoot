@@ -72,6 +72,7 @@ it('creates an order with the correct total and updates product stock', function
     $this->get(route('checkout.confirmation', $order))
         ->assertOk()
         ->assertSee('Casque audio');
+    expect($order->fresh()->status)->toBe('pending');
 });
 
 it('applies the selected coupon to the order and the Stripe checkout session', function () {
@@ -102,11 +103,12 @@ it('applies the selected coupon to the order and the Stripe checkout session', f
     $gateway = Mockery::mock(StripeCheckoutGateway::class);
     $gateway->shouldReceive('createSession')
         ->once()
-        ->withArgs(function (array $items, string $successUrl, string $cancelUrl, ?Coupon $appliedCoupon, float $discount, string $currency) use ($coupon) {
+        ->withArgs(function (array $items, string $successUrl, string $cancelUrl, ?Coupon $appliedCoupon, float $discount, string $currency, ?int $orderId) use ($coupon) {
             return $items[0]['quantity'] === 2
                 && $appliedCoupon?->is($coupon)
                 && $discount === 20.0
-                && $currency === 'EUR';
+                && $currency === 'EUR'
+                && $orderId !== null;
         })
         ->andReturn('https://checkout.example/session');
     $this->app->instance(StripeCheckoutGateway::class, $gateway);
@@ -166,10 +168,11 @@ it('charges and snapshots an administrator-selected XOF currency', function () {
     $gateway = Mockery::mock(StripeCheckoutGateway::class);
     $gateway->shouldReceive('createSession')
         ->once()
-        ->withArgs(function (array $items, string $successUrl, string $cancelUrl, ?Coupon $coupon, float $discount, string $currency) {
+        ->withArgs(function (array $items, string $successUrl, string $cancelUrl, ?Coupon $coupon, float $discount, string $currency, ?int $orderId) {
             return $currency === 'XOF'
                 && $items[0]['price_data']['currency'] === 'xof'
-                && $items[0]['price_data']['unit_amount'] === 1250;
+                && $items[0]['price_data']['unit_amount'] === 1250
+                && $orderId !== null;
         })
         ->andReturn('https://checkout.example/session');
     $this->app->instance(StripeCheckoutGateway::class, $gateway);

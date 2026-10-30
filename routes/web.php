@@ -10,6 +10,7 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ProductReviewController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
@@ -29,6 +30,7 @@ Route::post('/newsletter', [NewsletterController::class, 'store'])->middleware('
 Route::get('/newsletter/unsubscribe/{token}', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 Route::get('/legal', function () { return view('pages.legal'); })->name('pages.legal');
 Route::post('/language', [LanguageController::class, 'update'])->name('language.update');
+Route::post('/stripe/webhook', StripeWebhookController::class)->name('stripe.webhook');
 // Product detail
 Route::get('/products/{product}', [ProductController::class, 'show'])
     ->name('products.show');
@@ -82,6 +84,7 @@ Route::middleware(['auth','admin'])->prefix('admin')->name('admin.')->group(func
     // Settings routes
     Route::get('/settings', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+    Route::post('/settings/test-mail', [App\Http\Controllers\Admin\SettingController::class, 'testMail'])->name('settings.test-mail');
     Route::get('/administrators', [App\Http\Controllers\Admin\AdminUserController::class, 'index'])->name('admin-users.index');
     Route::post('/administrators', [App\Http\Controllers\Admin\AdminUserController::class, 'store'])->name('admin-users.store');
     Route::get('/messages', [App\Http\Controllers\Admin\ContactMessageController::class, 'index'])->name('messages.index');

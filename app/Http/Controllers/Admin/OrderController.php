@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Services\OrderStatusNotifier;
 
 class OrderController extends Controller
 {
@@ -23,14 +24,19 @@ class OrderController extends Controller
     /**
      * Update the status of an order.
      */
-    public function updateStatus(Request $request, Order $order)
+    public function updateStatus(Request $request, Order $order, OrderStatusNotifier $notifier)
 {
-    $request->validate([
+    $validated = $request->validate([
         'status' => ['required', 'in:pending,paid,shipped,delivered'],
     ]);
 
-    $order->status = $request->input('status');
+    $statusChanged = $order->status !== $validated['status'];
+    $order->status = $validated['status'];
     $order->save();
+
+    if ($statusChanged || ! $order->customer_status_emailed_at) {
+        $notifier->sendIfNeeded($order->fresh());
+    }
 
     return redirect()->route('admin.orders.index')
     ->with('success', 'Statut de la commande mis à jour.');

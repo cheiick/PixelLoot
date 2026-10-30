@@ -5,22 +5,48 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Config;
 
 class DataTransferSeeder extends Seeder
 {
     public function run()
     {
-        echo "🔄 Début du transfert MySQL → PostgreSQL...\n\n";
+        echo "🔄 Transfert MySQL → PostgreSQL (Render)...\n\n";
 
-        // Fonction helper pour transférer une table
-        $this->transferTable('categories');
-        $this->transferTable('products');
-        $this->transferTable('users');
-        $this->transferTable('orders');
-        $this->transferTable('order_items');
-        $this->transferTable('coupons');
-        $this->transferTable('site_settings');
-        $this->transferTable('contact_messages');
+        // 1. Définir dynamiquement la connexion MySQL locale (en dur)
+        Config::set('database.connections.mysql_temp', [
+            'driver' => 'mysql',
+            'host' => '127.0.0.1',
+            'port' => '3306',
+            'database' => 'ecommerce_db',
+            'username' => 'root',
+            'password' => '',
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+        ]);
+
+        // 2. Définir dynamiquement la connexion PostgreSQL Render (en dur)
+        Config::set('database.connections.pgsql_temp', [
+            'driver' => 'pgsql',
+            'host' => 'dpg-dbieg1ijnfac73bf49ag-a.frankfurt-postgres.render.com',
+            'port' => '5432',
+            'database' => 'monshop_db_lzgw',
+            'username' => 'monshop_db_lzgw_user',
+            'password' => 'DD4TRCLRQiAloaKjnbh6lIpHROdXa3PC', // ⚠️ REMPLACE CECI PAR TON VRAI MDP
+            'charset' => 'utf8',
+            'prefix' => '',
+            'schema' => 'public',
+            'sslmode' => 'require', // Obligatoire pour Render
+        ]);
+
+        $tables = [
+            'categories', 'products', 'users', 'orders', 
+            'order_items', 'coupons', 'site_settings', 'contact_messages'
+        ];
+
+        foreach ($tables as $table) {
+            $this->transferTable($table);
+        }
 
         echo "\n🎉 Transfert terminé !\n";
     }
@@ -28,33 +54,35 @@ class DataTransferSeeder extends Seeder
     private function transferTable($table)
     {
         try {
-            // Récupérer les colonnes de la source (MySQL)
-            $sourceColumns = Schema::connection('mysql_local')->getColumnListing($table);
+            // On utilise les NOMS des connexions temporaires (chaînes de caractères)
+            $source = 'mysql_temp';
+            $dest = 'pgsql_temp';
+
+            // Lire les colonnes de MySQL
+            $sourceColumns = Schema::connection($source)->getColumnListing($table);
             
-            // Récupérer les colonnes de la destination (PostgreSQL)
-            $destColumns = Schema::getColumnListing($table);
+            // Lire les colonnes de PostgreSQL
+            $destColumns = Schema::connection($dest)->getColumnListing($table);
             
-            // Colonnes communes
+            // Garder uniquement les colonnes communes
             $commonColumns = array_intersect($sourceColumns, $destColumns);
             
-            // Exclure 'id' du transfert (on garde les IDs de MySQL)
-            $columnsToTransfer = array_diff($commonColumns, []);
-            
             // Récupérer les données de MySQL
-            $data = DB::connection('mysql_local')->table($table)->get();
+            $data = DB::connection($source)->table($table)->get();
             
             if ($data->isEmpty()) {
-                echo "⚠️  $table : aucune donnée à transférer\n";
+                echo "⚠️  $table : aucune donnée\n";
                 return;
             }
             
             $count = 0;
             foreach ($data as $row) {
                 $rowArray = (array) $row;
-                // Ne garder que les colonnes communes
-                $filteredData = array_intersect_key($rowArray, array_flip($columnsToTransfer));
+                // Filtrer pour ne garder que les colonnes communes
+                $filteredData = array_intersect_key($rowArray, array_flip($commonColumns));
                 
-                DB::table($table)->updateOrInsert(
+                // Insérer ou mettre à jour dans PostgreSQL
+                DB::connection($dest)->table($table)->updateOrInsert(
                     ['id' => $row->id],
                     $filteredData
                 );

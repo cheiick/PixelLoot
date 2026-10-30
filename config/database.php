@@ -98,11 +98,10 @@ return [
         ],
 
         'mysql_local' => [
-    'driver' => 'mysql',
-    'url' => env('DATABASE_URL'),
+    'driver' => 'mysql',  // ⚠️ DOIT être 'mysql', PAS 'pgsql'
     'host' => env('DB_LOCAL_HOST', '127.0.0.1'),
     'port' => env('DB_LOCAL_PORT', '3306'),
-    'database' => env('DB_LOCAL_DATABASE', 'ecommerce_db'),
+    'database' => env('DB_LOCAL_DATABASE', 'monshop'),
     'username' => env('DB_LOCAL_USERNAME', 'root'),
     'password' => env('DB_LOCAL_PASSWORD', ''),
     'unix_socket' => env('DB_SOCKET', ''),

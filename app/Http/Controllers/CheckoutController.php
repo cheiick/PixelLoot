@@ -154,7 +154,8 @@ class CheckoutController extends Controller
                 route('cart.index'),
                 $coupon,
                 $discount,
-                $currencyCode
+                $currencyCode,
+                $order->id
             );
 
             return [
@@ -175,9 +176,7 @@ class CheckoutController extends Controller
 
     public function confirmation(Order $order)
     {
-        if ($order->status !== 'paid') {
-            $order->update(['status' => 'paid']);
-        }
+        abort_unless($order->user_id === auth()->id(), 404);
 
         Session::forget(['cart', 'coupon_code']);
 
