@@ -39,4 +39,10 @@ RUN composer install --no-dev --optimize-autoloader \
 EXPOSE 80
 
 # Démarrer Apache
-CMD ["apache2-foreground"]
+# Script de démarrage avec migrations
+RUN echo '#!/bin/bash\n\
+php artisan migrate --force\n\
+apache2-foreground' > /start.sh \
+    && chmod +x /start.sh
+
+CMD ["/start.sh"]
