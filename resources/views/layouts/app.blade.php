@@ -25,7 +25,43 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Tailwind CSS via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Alpine.js -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<!-- AOS Animations -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+<!-- Configuration Tailwind personnalisée -->
+<script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                colors: {
+                    primary: '#3b82f6',
+                    secondary: '#1e293b',
+                }
+            }
+        }
+    }
+</script>
+
+<!-- Initialisation AOS -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+    });
+</script>
+
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js']) 
 </head>
 <body data-currency-code="{{ app(\App\Support\CurrencyFormatter::class)->code() }}"
       data-currency-symbol="{{ app(\App\Support\CurrencyFormatter::class)->symbol() }}"
