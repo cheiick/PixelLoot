@@ -8,4 +8,9 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    // Configuration pour production
+    build: {
+        manifest: true,
+        outDir: 'public/build',
+    },
 });
