@@ -1,8 +1,8 @@
 FROM php:8.3-apache
 
-# Extensions PHP (ajout de intl et zip pour les emails)
+# Extensions PHP (intl pour NumberFormatter, zip pour les emails)
 RUN apt-get update && apt-get install -y \
-    git unzip libpq-dev libpng-dev libjpeg-dev libfreetype6-dev libicu-dev libzip-dev nodejs npm \
+    git unzip libpq-dev libpng-dev libjpeg-dev libfreetype6-dev libicu-dev libzip-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo pdo_pgsql pdo_mysql gd intl zip \
     && a2enmod rewrite
@@ -19,12 +19,7 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 WORKDIR /var/www/html
 COPY . .
 
-# Build Vite + Composer (séparé pour mieux voir les erreurs)
-RUN rm -rf node_modules public/build \
-    && npm install \
-    && npm run build \
-    && test -f public/build/manifest.json || (echo "⚠️ manifest.json introuvable" && ls -la public/build/) \
-
+# UNIQUEMENT Composer (le build Vite est déjà fait en local)
 RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist \
     && php artisan config:clear \
     && php artisan route:clear \
@@ -33,7 +28,7 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-di
 
 EXPOSE 80
 
-# Démarrage
+# Démarrage avec migrations
 RUN echo '#!/bin/bash\n\
 php artisan migrate --force\n\
 php artisan config:cache\n\
