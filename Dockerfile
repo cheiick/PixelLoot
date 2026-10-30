@@ -1,9 +1,9 @@
 FROM php:8.3-apache
 
-# Extensions PHP (intl pour NumberFormatter, zip pour les emails)
+# Extensions PHP + libwebp-dev pour le support WebP
 RUN apt-get update && apt-get install -y \
-    git unzip libpq-dev libpng-dev libjpeg-dev libfreetype6-dev libicu-dev libzip-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    git unzip libpq-dev libpng-dev libjpeg-dev libfreetype6-dev libicu-dev libzip-dev libwebp-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install pdo pdo_pgsql pdo_mysql gd intl zip \
     && a2enmod rewrite
 
@@ -19,7 +19,7 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 WORKDIR /var/www/html
 COPY . .
 
-# UNIQUEMENT Composer (le build Vite est déjà fait en local)
+# Composer uniquement (build Vite déjà fait en local)
 RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist \
     && php artisan config:clear \
     && php artisan route:clear \
