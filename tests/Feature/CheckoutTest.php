@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\SiteSetting;
 use App\Models\User;
 use App\Services\StripeCheckoutGateway;
+use Stripe\Exception\InvalidRequestException;
 
 it('creates an order with the correct total and updates product stock', function () {
     $category = Category::create([
@@ -190,4 +191,41 @@ it('charges and snapshots an administrator-selected XOF currency', function () {
         'currency_code' => 'XOF',
         'currency_symbol' => 'FCFA',
     ]);
+});
+
+it('explains Stripe minimum amount errors and keeps the cart without creating an order', function () {
+    SiteSetting::updateOrCreate(['key' => 'currency_code'], ['value' => 'XOF']);
+    SiteSetting::updateOrCreate(['key' => 'currency_symbol'], ['value' => 'FCFA']);
+
+    $category = Category::create(['name' => 'Électronique', 'slug' => 'electronique']);
+    $product = Product::create([
+        'category_id' => $category->id,
+        'name' => 'Article de test',
+        'slug' => 'article-de-test',
+        'price' => 60,
+        'stock' => 5,
+    ]);
+    $user = User::factory()->create();
+
+    $gateway = Mockery::mock(StripeCheckoutGateway::class);
+    $gateway->shouldReceive('createSession')
+        ->once()
+        ->andThrow(InvalidRequestException::factory(
+            "The Checkout Session's total amount must convert to at least 50 cents. 60 Fr converts to approximately €0.09.",
+            400
+        ));
+    $this->app->instance(StripeCheckoutGateway::class, $gateway);
+
+    $this->actingAs($user)
+        ->withSession(['cart' => [
+            $product->id => ['name' => $product->name, 'price' => 60, 'quantity' => 1],
+        ]])
+        ->from(route('checkout.show'))
+        ->post(route('checkout.store'), ['address' => 'Dakar'])
+        ->assertRedirect(route('checkout.show'))
+        ->assertSessionHasErrors('cart')
+        ->assertSessionHas('cart');
+
+    expect(Order::count())->toBe(0)
+        ->and($product->fresh()->stock)->toBe(5);
 });
