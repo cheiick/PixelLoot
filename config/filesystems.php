@@ -63,7 +63,6 @@ return [
             'key' => env('CLOUDINARY_KEY'),
             'secret' => env('CLOUDINARY_SECRET'),
             'cloud' => env('CLOUDINARY_CLOUD_NAME'),
-            'url' => env('CLOUDINARY_URL'),
             'secure' => env('CLOUDINARY_SECURE', true),
             'prefix' => env('CLOUDINARY_PREFIX'),
             'throw' => true,

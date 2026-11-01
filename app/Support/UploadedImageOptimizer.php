@@ -70,6 +70,21 @@ class UploadedImageOptimizer
 
         $path = $directory.'/'.Str::uuid().'.webp';
         $diskName = config('filesystems.image_disk', 'public');
+
+        if ($diskName === 'cloudinary') {
+            $cloudinary = config('filesystems.disks.cloudinary');
+            if (
+                empty($cloudinary['cloud'])
+                || ! preg_match('/^[A-Za-z0-9-]+$/', $cloudinary['cloud'])
+                || empty($cloudinary['key'])
+                || empty($cloudinary['secret'])
+            ) {
+                throw new RuntimeException(
+                    'La configuration Cloudinary est incomplète. Vérifiez CLOUDINARY_CLOUD_NAME, CLOUDINARY_KEY et CLOUDINARY_SECRET.'
+                );
+            }
+        }
+
         $disk = Storage::disk($diskName);
         if (! $disk->put($path, $webp)) {
             throw new RuntimeException('Impossible d’enregistrer l’image optimisée.');

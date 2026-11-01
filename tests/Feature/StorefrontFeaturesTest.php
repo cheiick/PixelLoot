@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Category;
+use App\Models\NewsletterSubscriber;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -11,6 +12,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 function createStorefrontTestProduct(array $attributes = []): Product
 {
@@ -81,7 +83,7 @@ it('allows signed-in customers to manage a wishlist', function () {
 it('shows only three home categories at a time in a horizontal carousel', function () {
     Cache::forget('storefront.home.categories');
     foreach (['Audio', 'Consoles', 'Jeux', 'Accessoires', 'Informatique'] as $name) {
-        Category::create(['name' => $name, 'slug' => \Illuminate\Support\Str::slug($name)]);
+        Category::create(['name' => $name, 'slug' => Str::slug($name)]);
     }
 
     $this->get(route('home'))
@@ -127,7 +129,12 @@ it('compresses uploaded images to resized WebP assets', function () {
 
 it('stores optimized images on the configured Cloudinary disk', function () {
     Storage::fake('cloudinary');
-    config(['filesystems.image_disk' => 'cloudinary']);
+    config([
+        'filesystems.image_disk' => 'cloudinary',
+        'filesystems.disks.cloudinary.cloud' => 'pixel-loot',
+        'filesystems.disks.cloudinary.key' => 'test-key',
+        'filesystems.disks.cloudinary.secret' => 'test-secret',
+    ]);
     $file = UploadedFile::fake()->image('photo.jpg', 800, 600);
 
     $url = app(UploadedImageOptimizer::class)->storeWebp($file, 'products');
@@ -135,6 +142,20 @@ it('stores optimized images on the configured Cloudinary disk', function () {
 
     expect($storedImages)->toHaveCount(1)
         ->and($url)->toBe(Storage::disk('cloudinary')->url($storedImages[0]));
+});
+
+it('rejects an incomplete Cloudinary configuration before storing an image', function () {
+    config([
+        'filesystems.image_disk' => 'cloudinary',
+        'filesystems.disks.cloudinary.cloud' => '',
+        'filesystems.disks.cloudinary.key' => '',
+        'filesystems.disks.cloudinary.secret' => '',
+    ]);
+
+    expect(fn () => app(UploadedImageOptimizer::class)->storeWebp(
+        UploadedFile::fake()->image('photo.jpg'),
+        'products'
+    ))->toThrow(RuntimeException::class, 'La configuration Cloudinary est incomplète.');
 });
 
 it('rate limits repeated wishlist mutations', function () {
@@ -194,7 +215,7 @@ it('records newsletter subscribers and supports tokenized unsubscribe links', fu
     $response = $this->from(route('home'))->post(route('newsletter.store'), ['email' => ' Client@Example.com ']);
     $response->assertRedirect(route('home'))
         ->assertSessionHas('newsletter_success');
-    $subscriber = \App\Models\NewsletterSubscriber::firstOrFail();
+    $subscriber = NewsletterSubscriber::firstOrFail();
     expect($subscriber->email)->toBe('client@example.com');
 
     $this->get(route('newsletter.unsubscribe', $subscriber->unsubscribe_token))
