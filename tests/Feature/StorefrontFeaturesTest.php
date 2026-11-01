@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\User;
 use App\Support\CloudinaryImageUploader;
+use App\Support\ConfiguredSmtpMailer;
 use App\Support\UploadedImageOptimizer;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
@@ -217,6 +218,9 @@ it('accepts product reviews only after purchase and requires admin approval', fu
 
 it('records newsletter subscribers and supports tokenized unsubscribe links', function () {
     Mail::fake();
+    $smtpMailer = Mockery::mock(ConfiguredSmtpMailer::class);
+    $smtpMailer->shouldReceive('configure')->once()->andReturn(true);
+    $this->app->instance(ConfiguredSmtpMailer::class, $smtpMailer);
 
     $response = $this->from(route('home'))->post(route('newsletter.store'), ['email' => ' Client@Example.com ']);
     $response->assertRedirect(route('home'))
@@ -228,6 +232,21 @@ it('records newsletter subscribers and supports tokenized unsubscribe links', fu
         ->assertRedirect(route('home'))
         ->assertSessionHas('newsletter_success');
     expect($subscriber->fresh()->unsubscribed_at)->not->toBeNull();
+});
+
+it('records newsletter signup without trying the default mail transport when SMTP is disabled', function () {
+    Mail::fake();
+    $smtpMailer = Mockery::mock(ConfiguredSmtpMailer::class);
+    $smtpMailer->shouldReceive('configure')->once()->andReturn(false);
+    $this->app->instance(ConfiguredSmtpMailer::class, $smtpMailer);
+
+    $this->from(route('home'))
+        ->post(route('newsletter.store'), ['email' => 'client@example.com'])
+        ->assertRedirect(route('home'))
+        ->assertSessionHas('newsletter_error');
+
+    $this->assertDatabaseHas('newsletter_subscribers', ['email' => 'client@example.com']);
+    Mail::assertNothingOutgoing();
 });
 
 it('exposes review moderation and newsletter management to administrators', function () {

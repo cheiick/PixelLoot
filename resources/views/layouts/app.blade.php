@@ -199,6 +199,9 @@
             @if(session('newsletter_success'))
                 <p class="mt-3 text-sm text-green-300" role="status">{{ session('newsletter_success') }}</p>
             @endif
+            @if(session('newsletter_error'))
+                <p class="mt-3 text-sm text-amber-300" role="alert">{{ session('newsletter_error') }}</p>
+            @endif
             @error('email')
                 <p class="mt-3 text-sm text-red-300" role="alert">{{ $message }}</p>
             @enderror
