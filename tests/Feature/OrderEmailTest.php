@@ -85,7 +85,12 @@ it('marks a paid Stripe order and sends one detailed email despite webhook retri
     $mailable = Mail::sent(OrderStatusUpdated::class)->first();
     expect($mailable->render())->toContain('Casque Helix')
         ->toContain('Dakar, Sénégal')
-        ->toContain('Payée');
+        ->toContain('Payée')
+        ->toContain('role="presentation"')
+        ->toContain('background-color:#0f172a')
+        ->toContain('font-family:Arial, Helvetica, sans-serif')
+        ->toContain('Détails de la commande')
+        ->toContain('Total');
 
     $this->call('POST', route('stripe.webhook'), [], [], [], $headers, $payload)->assertOk();
     Mail::assertSentCount(1);
