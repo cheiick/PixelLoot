@@ -85,13 +85,15 @@ class UploadedImageOptimizer
             }
         }
 
+        if ($diskName === 'cloudinary') {
+            return app(CloudinaryImageUploader::class)->upload($webp, substr($path, 0, -strlen('.webp')));
+        }
+
         $disk = Storage::disk($diskName);
         if (! $disk->put($path, $webp)) {
             throw new RuntimeException('Impossible d’enregistrer l’image optimisée.');
         }
 
-        return $diskName === 'cloudinary'
-            ? $disk->url($path)
-            : $path;
+        return $path;
     }
 }

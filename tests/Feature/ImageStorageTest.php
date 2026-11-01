@@ -1,6 +1,10 @@
 <?php
 
+use App\Support\CloudinaryImageUploader;
 use App\Support\ImageStorage;
+use Cloudinary\Api\ApiResponse;
+use Cloudinary\Api\Upload\UploadApi;
+use Cloudinary\Cloudinary;
 use Illuminate\Support\Facades\Storage;
 
 it('keeps Cloudinary URLs intact and deletes the referenced asset', function () {
@@ -20,4 +24,28 @@ it('continues to generate public disk URLs for existing local image paths', func
 
     expect(ImageStorage::url('products/photo.webp'))
         ->toBe(Storage::disk('public')->url('products/photo.webp'));
+});
+
+it('uploads image data as a Cloudinary-supported base64 data URI', function () {
+    $uploadApi = Mockery::mock(UploadApi::class);
+    $uploadApi->shouldReceive('upload')
+        ->once()
+        ->withArgs(function (string $dataUri, array $options): bool {
+            return $dataUri === 'data:image/webp;base64,'.base64_encode('RIFFvalid-webp-data')
+                && $options === [
+                    'public_id' => 'products/photo',
+                    'resource_type' => 'image',
+                    'format' => 'webp',
+                ];
+        })
+        ->andReturn(new ApiResponse([
+            'secure_url' => 'https://res.cloudinary.com/demo/image/upload/products/photo.webp',
+        ], []));
+    $cloudinary = Mockery::mock(Cloudinary::class);
+    $cloudinary->shouldReceive('uploadApi')->once()->andReturn($uploadApi);
+
+    $url = app(CloudinaryImageUploader::class, ['cloudinary' => $cloudinary])
+        ->upload('RIFFvalid-webp-data', 'products/photo');
+
+    expect($url)->toBe('https://res.cloudinary.com/demo/image/upload/products/photo.webp');
 });

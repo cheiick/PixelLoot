@@ -7,6 +7,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\User;
+use App\Support\CloudinaryImageUploader;
 use App\Support\UploadedImageOptimizer;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
@@ -128,20 +129,25 @@ it('compresses uploaded images to resized WebP assets', function () {
 });
 
 it('stores optimized images on the configured Cloudinary disk', function () {
-    Storage::fake('cloudinary');
     config([
         'filesystems.image_disk' => 'cloudinary',
         'filesystems.disks.cloudinary.cloud' => 'pixel-loot',
         'filesystems.disks.cloudinary.key' => 'test-key',
         'filesystems.disks.cloudinary.secret' => 'test-secret',
     ]);
+    $uploader = Mockery::mock(CloudinaryImageUploader::class);
+    $uploader->shouldReceive('upload')
+        ->once()
+        ->withArgs(fn (string $contents, string $publicId) => str_starts_with($contents, 'RIFF')
+            && str_starts_with($publicId, 'products/'))
+        ->andReturn('https://res.cloudinary.com/pixel-loot/image/upload/products/photo.webp');
+    $this->app->instance(CloudinaryImageUploader::class, $uploader);
+
     $file = UploadedFile::fake()->image('photo.jpg', 800, 600);
 
     $url = app(UploadedImageOptimizer::class)->storeWebp($file, 'products');
-    $storedImages = Storage::disk('cloudinary')->allFiles('products');
 
-    expect($storedImages)->toHaveCount(1)
-        ->and($url)->toBe(Storage::disk('cloudinary')->url($storedImages[0]));
+    expect($url)->toBe('https://res.cloudinary.com/pixel-loot/image/upload/products/photo.webp');
 });
 
 it('rejects an incomplete Cloudinary configuration before storing an image', function () {
