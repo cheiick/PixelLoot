@@ -57,7 +57,7 @@
                     <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-blue-700">{{ $product->brand }}</p>
                 @endif
 
-                <h1 class="text-3xl font-bold tracking-tight text-gray-950 sm:text-4xl">{{ $product->name }}</h1>
+                <h1 class="break-words text-2xl font-bold tracking-tight text-gray-950 sm:text-4xl">{{ $product->name }}</h1>
                 <p class="mt-2 text-sm text-amber-600" aria-label="Note moyenne">
                     @if($reviewCount)
                         {{ str_repeat('★', (int) round($averageRating)) }}{{ str_repeat('☆', 5 - (int) round($averageRating)) }}
@@ -68,7 +68,7 @@
                 </p>
 
                 <div class="mt-5 flex flex-wrap items-end justify-between gap-4 border-b border-gray-100 pb-6">
-                    <p class="text-4xl font-bold tracking-tight text-gray-950">@money($product->price)</p>
+                    <p class="break-words text-3xl font-bold tracking-tight text-gray-950 sm:text-4xl">@money($product->price)</p>
                     @if($product->stock > 0)
                         <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700">
                             <span class="h-2 w-2 rounded-full bg-emerald-500"></span>

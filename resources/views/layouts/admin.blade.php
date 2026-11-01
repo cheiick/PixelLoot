@@ -76,7 +76,7 @@
         </div>
     </aside>
 
-    <main class="mt-16 min-h-[calc(100vh-8rem)] px-4 py-6 sm:px-6 sm:py-8 lg:ml-72 lg:px-8">
+    <main class="mt-16 min-h-[calc(100vh-8rem)] min-w-0 px-4 py-6 sm:px-6 sm:py-8 lg:ml-72 lg:px-8">
         @yield('content')
     </main>
 

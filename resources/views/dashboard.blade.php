@@ -5,7 +5,7 @@
         <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>
                 <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Espace client</p>
-                <h1 class="mt-1 text-3xl font-bold tracking-tight text-gray-950">Bonjour {{ $user->name }}</h1>
+                <h1 class="mt-1 break-words text-2xl font-bold tracking-tight text-gray-950 sm:text-3xl">Bonjour {{ $user->name }}</h1>
                 <p class="mt-2 text-gray-600">Gérez vos informations et retrouvez vos commandes.</p>
             </div>
             <a href="{{ route('catalog.index') }}" class="inline-flex items-center rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white shadow-sm transition hover:bg-blue-700">
@@ -93,7 +93,7 @@
                         <ul class="space-y-2 py-3 text-sm text-gray-600">
                             @foreach($order->items as $item)
                                 <li class="flex justify-between gap-3">
-                                    <span>{{ $item->product?->name ?? 'Produit supprimé' }} × {{ $item->quantity }}</span>
+                                    <span class="min-w-0 break-words">{{ $item->product?->name ?? 'Produit supprimé' }} × {{ $item->quantity }}</span>
                                     <span class="whitespace-nowrap">@money($item->price * $item->quantity, $order->currency_code, $order->currency_symbol)</span>
                                 </li>
                             @endforeach

@@ -12,7 +12,8 @@
 
         <div class="bg-white shadow rounded p-6 mb-6">
             <h2 class="text-xl font-semibold mb-4">{{ __('Récapitulatif des articles') }}</h2>
-            <table class="min-w-full divide-y divide-gray-200 mb-4">
+            <div class="mb-4 overflow-x-auto">
+            <table class="min-w-[36rem] divide-y divide-gray-200">
                 <thead>
                     <tr>
                         <th class="px-4 py-2 text-left text-sm font-medium text-gray-500">{{ __('Produit') }}</th>
@@ -53,6 +54,7 @@
                     </tr>
                 </tbody>
             </table>
+            </div>
             <p class="text-right font-medium">{{ __('Statut :') }} {{ ucfirst($order->status) }}</p>
         </div>
 

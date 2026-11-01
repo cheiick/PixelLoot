@@ -49,6 +49,47 @@ it('loads the admin orders page for an administrator', function () {
         ->assertSee('Aucune commande pour le moment.');
 });
 
+it('shows product images immediately after their ids in the admin list', function () {
+    Storage::fake('public');
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+    $category = Category::create(['name' => 'Jeux', 'slug' => 'jeux']);
+    $product = Product::create([
+        'category_id' => $category->id,
+        'name' => 'Clavier gaming',
+        'slug' => 'clavier-gaming',
+        'price' => 80,
+        'stock' => 4,
+        'image_path' => 'products/clavier.webp',
+    ]);
+    $externalImage = 'https://example.com/souris.jpg';
+    Product::create([
+        'category_id' => $category->id,
+        'name' => 'Souris gaming',
+        'slug' => 'souris-gaming',
+        'price' => 40,
+        'stock' => 3,
+        'image_url' => $externalImage,
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->get(route('admin.products.index'))
+        ->assertOk()
+        ->assertSee(Storage::disk('public')->url($product->image_path))
+        ->assertSee($externalImage);
+
+    $content = $response->getContent();
+    $idPosition = strpos($content, $product->id.'</td>');
+    $imagePosition = strpos($content, Storage::disk('public')->url($product->image_path));
+    $namePosition = strpos($content, 'Clavier gaming</td>');
+
+    expect($idPosition)->not->toBeFalse()
+        ->and($imagePosition)->not->toBeFalse()
+        ->and($namePosition)->not->toBeFalse()
+        ->and($idPosition)->toBeLessThan($imagePosition)
+        ->and($imagePosition)->toBeLessThan($namePosition);
+});
+
 it('allows an administrator to create and update product categories', function () {
     $admin = User::factory()->create();
     $admin->forceFill(['is_admin' => true])->save();

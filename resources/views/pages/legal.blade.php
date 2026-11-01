@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto py-16 px-4">
-    <h1 class="text-4xl font-bold text-gray-900 mb-8">Mentions légales & CGV</h1>
+    <h1 class="mb-8 text-3xl font-bold text-gray-900 sm:text-4xl">Mentions légales & CGV</h1>
     <div class="prose prose-lg text-gray-600 space-y-6">
         <section>
             <h2 class="text-2xl font-semibold text-gray-900 mb-4">Mentions légales</h2>

@@ -164,7 +164,7 @@ it('adds from product pages and updates cart quantities without a page reload', 
         ->assertOk()
         ->assertSee('data-quantity-change', false)
         ->assertSee('data-cart-total', false)
-        ->assertSee('aria-label="Voir mon panier"', false);
+        ->assertDontSee('aria-label="Voir mon panier"', false);
 });
 
 it('generates secure same-origin cart URLs behind a forwarded HTTPS proxy', function () {

@@ -3,9 +3,9 @@
 @section('title', 'Gestion des coupons')
 
 @section('content')
-    <div class="flex justify-between items-center mb-4">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h1 class="text-xl font-semibold">Coupons</h1>
-        <a href="{{ route('admin.coupons.create') }}" class="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Créer un coupon</a>
+        <a href="{{ route('admin.coupons.create') }}" class="rounded bg-blue-600 px-4 py-2 text-center text-white hover:bg-blue-700">Créer un coupon</a>
     </div>
 
     @if(session('success'))
@@ -14,7 +14,8 @@
         </div>
     @endif
 
-    <table class="min-w-full bg-white border border-gray-200 rounded">
+    <div class="overflow-x-auto rounded bg-white">
+    <table class="min-w-[56rem] border border-gray-200">
         <thead>
             <tr>
                 <th class="px-4 py-2 text-left">Code</th>
@@ -66,6 +67,7 @@
             @endforelse
         </tbody>
     </table>
+    </div>
 
     <div class="mt-4">
         {{ $coupons->links() }}

@@ -5,7 +5,7 @@
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
             <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Vue d’ensemble</p>
-            <h1 class="mt-1 text-3xl font-bold tracking-tight text-gray-950">Dashboard administrateur</h1>
+            <h1 class="mt-1 break-words text-2xl font-bold tracking-tight text-gray-950 sm:text-3xl">Dashboard administrateur</h1>
             <p class="mt-2 text-gray-600">Suivez l’activité de votre boutique et accédez rapidement à sa gestion.</p>
         </div>
         <a href="{{ route('home') }}" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50">Voir la boutique ↗</a>
@@ -56,7 +56,7 @@
 
     <div class="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]">
         <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-            <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
                 <div><h2 class="font-bold text-gray-950">Commandes récentes</h2><p class="mt-1 text-sm text-gray-500">Les six dernières commandes de la boutique.</p></div>
                 <a href="{{ route('admin.orders.index') }}" class="text-sm font-semibold text-blue-700 hover:text-blue-900">Tout voir →</a>
             </div>

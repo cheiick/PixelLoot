@@ -3,7 +3,7 @@
 @section('content')
 <div class="py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">Gestion des commandes</h1>
+        <h1 class="mb-6 text-2xl font-bold text-gray-800">Gestion des commandes</h1>
 
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -11,8 +11,9 @@
             </div>
         @endif
 
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
+        <div class="overflow-hidden rounded-lg bg-white shadow">
+          <div class="overflow-x-auto">
+            <table class="min-w-[64rem] divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">N°</th>
@@ -55,7 +56,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4">
-    <form action="{{ route('admin.orders.updateStatus', $order) }}" method="POST" class="flex items-center gap-1">
+    <form action="{{ route('admin.orders.updateStatus', $order) }}" method="POST" class="flex min-w-56 flex-wrap items-center gap-1">
         @csrf
         <button type="submit" name="status" value="pending"
             class="px-2 py-1 text-xs rounded {{ $order->status === 'pending' ? 'bg-red-600 text-white' : 'bg-red-100 text-red-800 hover:bg-red-200' }}">
@@ -85,6 +86,7 @@
                     @endforelse
                 </tbody>
             </table>
+          </div>
         </div>
     </div>
 </div>

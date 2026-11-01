@@ -3,9 +3,9 @@
 @section('title', 'Gestion des catégories')
 
 @section('content')
-    <div class="flex items-center justify-between mb-6">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 class="text-2xl font-bold">Catégories de produits</h1>
-        <a href="{{ route('admin.categories.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        <a href="{{ route('admin.categories.create') }}" class="rounded bg-blue-600 px-4 py-2 text-center text-white hover:bg-blue-700">
             Ajouter une catégorie
         </a>
     </div>
@@ -16,8 +16,9 @@
         </div>
     @endif
 
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
+    <div class="overflow-hidden rounded-lg bg-white shadow">
+      <div class="overflow-x-auto">
+        <table class="min-w-[48rem] divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
@@ -47,6 +48,7 @@
                 @endforelse
             </tbody>
         </table>
+      </div>
     </div>
 
     <div class="mt-4">{{ $categories->links() }}</div>

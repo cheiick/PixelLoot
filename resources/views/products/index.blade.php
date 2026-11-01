@@ -13,7 +13,7 @@
     @endphp
 
     <section
-        class="relative isolate flex min-h-[540px] h-[70vh] max-h-[800px] w-full items-center overflow-hidden bg-gradient-to-r from-gray-950 to-blue-950"
+        class="relative isolate flex min-h-[420px] h-[70vh] max-h-[800px] w-full items-center overflow-hidden bg-gradient-to-r from-gray-950 to-blue-950 sm:min-h-[540px]"
         x-data="{ activeSlide: 0, slideCount: {{ count($heroImages) }} }"
         x-init="if (slideCount > 1) setInterval(() => activeSlide = (activeSlide + 1) % slideCount, 5000)"
         aria-label="Bannière d’accueil"
@@ -31,19 +31,19 @@
         <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/20" aria-hidden="true"></div>
         <div class="relative z-10 mx-auto w-full max-w-7xl px-6 py-20 lg:px-8">
             <div class="max-w-3xl">
-                <h1 class="text-5xl md:text-6xl font-bold text-white leading-tight">
+                <h1 class="break-words text-4xl font-bold leading-tight text-white sm:text-5xl md:text-6xl">
                     {{ $siteSettings->get('hero_title', 'Gaming & High-Tech') }}
                 </h1>
-                <p class="text-xl text-blue-100 mt-6 max-w-lg">
+                <p class="mt-6 max-w-lg text-lg text-blue-100 sm:text-xl">
                     {{ $siteSettings->get('hero_description', 'Découvrez les derniers jeux, consoles et accessoires tech au meilleur prix. Livraison rapide et garantie incluse.') }}
                 </p>
                 <div class="mt-8 flex flex-wrap gap-3">
-                    <a href="{{ route('catalog.index') }}" class="inline-flex items-center justify-center rounded-full bg-blue-600 px-8 py-4 font-bold text-white shadow-lg transition hover:bg-blue-700 hover:shadow-blue-500/50">
+                    <a href="{{ route('catalog.index') }}" class="inline-flex min-h-12 items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-center font-bold text-white shadow-lg transition hover:bg-blue-700 hover:shadow-blue-500/50 sm:px-8 sm:py-4">
                         {{ __('Voir le catalogue') }}
                     </a>
                     @guest
                         @if(Route::has('register'))
-                            <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-full border border-white/70 bg-white/10 px-8 py-4 font-bold text-white backdrop-blur transition hover:bg-white hover:text-slate-950">
+                            <a href="{{ route('register') }}" class="inline-flex min-h-12 items-center justify-center rounded-full border border-white/70 bg-white/10 px-6 py-3 text-center font-bold text-white backdrop-blur transition hover:bg-white hover:text-slate-950 sm:px-8 sm:py-4">
                                 Créer un compte
                             </a>
                         @endif

@@ -4,7 +4,7 @@
 <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
     <div class="mb-10 max-w-2xl">
         <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Nous sommes là pour vous</p>
-        <h1 class="mt-2 text-4xl font-bold tracking-tight text-gray-950">Contactez-nous</h1>
+        <h1 class="mt-2 text-3xl font-bold tracking-tight text-gray-950 sm:text-4xl">Contactez-nous</h1>
         <p class="mt-3 leading-7 text-gray-600">Une question sur un produit ou une commande ? Envoyez-nous un message, notre équipe vous répondra dès que possible.</p>
     </div>
 
@@ -28,7 +28,7 @@
             <div class="mt-7 space-y-5">
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">E-mail</p>
-                    <a href="mailto:{{ $contactEmail }}" class="mt-1 inline-block font-medium hover:text-blue-300">{{ $contactEmail }}</a>
+                    <a href="mailto:{{ $contactEmail }}" class="mt-1 inline-block break-all font-medium hover:text-blue-300">{{ $contactEmail }}</a>
                 </div>
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Téléphone</p>

@@ -51,7 +51,7 @@
                 @endif
             </section>
 
-            <form action="{{ route('checkout.store') }}" method="POST" class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <form action="{{ route('checkout.store') }}" method="POST" class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
                 @csrf
                 <div class="mb-6">
                     <label for="address" class="block text-sm font-medium mb-2">{{ __('Adresse de livraison') }}</label>
@@ -109,7 +109,7 @@
                     </table>
                 </div>
 
-                <button type="submit" class="bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700">
+                <button type="submit" class="min-h-12 w-full rounded bg-green-600 px-6 py-3 font-semibold text-white hover:bg-green-700 sm:w-auto">
                     {{ __('Procéder au paiement') }}
                 </button>
             </form>

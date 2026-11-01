@@ -124,8 +124,8 @@
                 @endguest
             </div>
 
-            <div class="flex shrink-0 items-center gap-4 lg:hidden">
-                <button type="button" data-theme-toggle aria-label="Activer ou désactiver le mode sombre" aria-pressed="false" class="rounded-lg px-1 py-1 text-xl">🌙</button>
+            <div class="flex shrink-0 items-center gap-2 sm:gap-4 lg:hidden">
+                <button type="button" data-theme-toggle aria-label="Activer ou désactiver le mode sombre" aria-pressed="false" class="rounded-lg px-1 py-1 text-lg sm:text-xl">🌙</button>
                 <a href="{{ route('cart.index') }}" aria-label="Panier ({{ $cartCount }} article(s))" class="relative inline-flex items-center text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18l-1.5 9H4.5L3 3z"/>
@@ -182,7 +182,7 @@
     </header>
 
     <!-- Page Content -->
-    <main class="min-h-screen">
+    <main class="min-h-screen min-w-0">
         @if(session('wishlist_message'))
             <div data-wishlist-notice role="status" aria-live="polite" class="fixed right-4 top-20 z-[60] max-w-sm rounded-lg bg-emerald-700 px-5 py-4 font-medium text-white shadow-xl">
                 {{ session('wishlist_message') }}
@@ -234,7 +234,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5 shrink-0" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 7.5 12 13l9-5.5M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/>
                     </svg>
-                    <a href="mailto:{{ App\Models\SiteSetting::getValue('footer_email', 'contact@monshop.com') }}" class="hover:text-white">
+                    <a href="mailto:{{ App\Models\SiteSetting::getValue('footer_email', 'contact@monshop.com') }}" class="break-all hover:text-white">
                         {{ App\Models\SiteSetting::getValue('footer_email', 'contact@monshop.com') }}
                     </a>
                 </p>
@@ -277,16 +277,18 @@
             <p class="text-center text-xs text-gray-500">© {{ date('Y') }} {{ $siteSettings->get('site_name', 'MonShop') }}. Tous droits réservés.</p>
         </div>
     </footer>
-    <a href="{{ route('cart.index') }}" aria-label="Voir mon panier" title="Voir mon panier" class="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-xl transition hover:scale-105 hover:bg-blue-700">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-7 w-7" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l2.2 11.2a2 2 0 0 0 2 1.6h8.7a2 2 0 0 0 1.9-1.4L22 8H6"/>
-            <circle cx="10" cy="20" r="1"/>
-            <circle cx="18" cy="20" r="1"/>
-        </svg>
-        <span data-cart-count class="absolute -right-1 -top-1 {{ $cartCount > 0 ? '' : 'hidden' }} flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-xs font-bold text-white">
-            {{ $cartCount }}
-        </span>
-    </a>
+    @unless(request()->routeIs('cart.index'))
+        <a href="{{ route('cart.index') }}" aria-label="Voir mon panier" title="Voir mon panier" class="fixed bottom-4 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-xl transition hover:scale-105 hover:bg-blue-700 sm:bottom-6 sm:right-6 sm:h-14 sm:w-14">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-7 w-7" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l2.2 11.2a2 2 0 0 0 2 1.6h8.7a2 2 0 0 0 1.9-1.4L22 8H6"/>
+                <circle cx="10" cy="20" r="1"/>
+                <circle cx="18" cy="20" r="1"/>
+            </svg>
+            <span data-cart-count class="absolute -right-1 -top-1 {{ $cartCount > 0 ? '' : 'hidden' }} flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-xs font-bold text-white">
+                {{ $cartCount }}
+            </span>
+        </a>
+    @endunless
     <div data-cart-notice role="status" aria-live="polite" class="fixed right-4 top-20 z-[60] hidden max-w-sm rounded-lg px-4 py-3 text-white shadow-lg"></div>
     <script>
         (() => {
