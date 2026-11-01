@@ -32,7 +32,7 @@
                 <header class="mb-8 flex items-center justify-between sm:mb-12">
                     <a href="{{ route('home') }}" class="inline-flex min-w-0 items-center gap-3 text-white">
                         @if(\App\Models\SiteSetting::getValue('site_logo'))
-                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url(\App\Models\SiteSetting::getValue('site_logo')) }}" alt="" class="max-h-11 max-w-40 object-contain sm:max-h-14 sm:max-w-48">
+                            <img src="{{ \App\Support\ImageStorage::url(\App\Models\SiteSetting::getValue('site_logo')) }}" alt="" class="max-h-11 max-w-40 object-contain sm:max-h-14 sm:max-w-48">
                             <span class="sr-only">{{ \App\Models\SiteSetting::getValue('site_name', 'MonShop') }}</span>
                         @else
                             <span class="truncate text-lg font-bold tracking-tight sm:text-xl">{{ \App\Models\SiteSetting::getValue('site_name', 'MonShop') }}<span class="text-blue-400">.</span></span>

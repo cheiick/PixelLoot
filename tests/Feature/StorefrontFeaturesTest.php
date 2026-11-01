@@ -125,6 +125,18 @@ it('compresses uploaded images to resized WebP assets', function () {
         ->and($storedImage[0])->toBeLessThanOrEqual(1920);
 });
 
+it('stores optimized images on the configured Cloudinary disk', function () {
+    Storage::fake('cloudinary');
+    config(['filesystems.image_disk' => 'cloudinary']);
+    $file = UploadedFile::fake()->image('photo.jpg', 800, 600);
+
+    $url = app(UploadedImageOptimizer::class)->storeWebp($file, 'products');
+    $storedImages = Storage::disk('cloudinary')->allFiles('products');
+
+    expect($storedImages)->toHaveCount(1)
+        ->and($url)->toBe(Storage::disk('cloudinary')->url($storedImages[0]));
+});
+
 it('rate limits repeated wishlist mutations', function () {
     $user = User::factory()->create();
     $product = createStorefrontTestProduct();

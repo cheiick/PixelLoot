@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use App\Models\Product;
 use App\Models\Category;
+use App\Support\ImageStorage;
 use App\Support\UploadedImageOptimizer;
 use Illuminate\Support\Facades\Cache;
 
@@ -93,7 +93,7 @@ class ProductController extends Controller
 
         $product->update($data);
         if ($previousImagePath) {
-            Storage::disk('public')->delete($previousImagePath);
+            ImageStorage::delete($previousImagePath);
         }
         Cache::forget('storefront.catalog.facets');
 
@@ -105,6 +105,7 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
+        ImageStorage::delete($product->image_path);
         $product->delete();
         Cache::forget('storefront.catalog.facets');
         return redirect()->route('admin.products.index')->with('success', 'Produit supprimé avec succès.');

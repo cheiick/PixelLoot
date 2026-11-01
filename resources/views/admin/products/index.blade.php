@@ -33,7 +33,7 @@
                     <td class="border px-4 py-2">{{ $product->id }}</td>
                     <td class="border px-4 py-2">
                         @if($product->image_path)
-                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($product->image_path) }}" alt="{{ $product->name }}" loading="lazy" class="h-12 w-12 rounded object-cover">
+                            <img src="{{ \App\Support\ImageStorage::url($product->image_path) }}" alt="{{ $product->name }}" loading="lazy" class="h-12 w-12 rounded object-cover">
                         @elseif($product->image_url)
                             <img src="{{ $product->image_url }}" alt="{{ $product->name }}" loading="lazy" class="h-12 w-12 rounded object-cover">
                         @else

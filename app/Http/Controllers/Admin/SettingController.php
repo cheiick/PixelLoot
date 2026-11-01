@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SmtpConnectionTest;
-use Illuminate\Support\Facades\Storage;
+use App\Support\ImageStorage;
 use Illuminate\Validation\ValidationException;
 use App\Support\UploadedImageOptimizer;
 
@@ -163,11 +163,11 @@ class SettingController extends Controller
         });
 
         if ($previousLogo && ($newLogo !== null || $removeLogo)) {
-            Storage::disk('public')->delete($previousLogo);
+            ImageStorage::delete($previousLogo);
         }
 
         if ($replaceHeroImages || $removeHeroImages) {
-            Storage::disk('public')->delete($previousHeroImages);
+            ImageStorage::delete($previousHeroImages);
         }
 
         return back()->with('success', 'Paramètres mis à jour avec succès.');

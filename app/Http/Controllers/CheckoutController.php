@@ -8,10 +8,10 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\StripeCheckoutGateway;
 use App\Support\CurrencyFormatter;
+use App\Support\ImageStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class CheckoutController extends Controller
@@ -27,7 +27,7 @@ class CheckoutController extends Controller
             $product = $products->get((int) $productId);
 
             if ($product?->image_path) {
-                $cart[$productId]['image'] = Storage::disk('public')->url($product->image_path);
+                $cart[$productId]['image'] = ImageStorage::url($product->image_path);
             } elseif ($product?->image_url) {
                 $cart[$productId]['image'] = $product->image_url;
             } else {

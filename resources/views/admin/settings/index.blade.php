@@ -50,7 +50,7 @@
                 <input type="file" id="site_logo" name="site_logo" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="w-full border rounded px-3 py-2">
                 @if($settings['site_logo'])
                     <div class="mt-3 flex items-center gap-4">
-                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($settings['site_logo']) }}" alt="Logo actuel du site" class="max-h-16 max-w-48 object-contain">
+                        <img src="{{ \App\Support\ImageStorage::url($settings['site_logo']) }}" alt="Logo actuel du site" class="max-h-16 max-w-48 object-contain">
                         <label class="flex items-center gap-2 text-sm">
                             <input type="checkbox" name="remove_site_logo" value="1">
                             Supprimer le logo actuel
@@ -77,7 +77,7 @@
                 @if(count($settings['hero_images']) > 0)
                     <div class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3">
                         @foreach($settings['hero_images'] as $image)
-                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($image) }}" alt="Image actuelle du banner" class="h-32 w-full rounded-lg object-cover">
+                            <img src="{{ \App\Support\ImageStorage::url($image) }}" alt="Image actuelle du banner" class="h-32 w-full rounded-lg object-cover">
                         @endforeach
                     </div>
                     <div class="mt-3">

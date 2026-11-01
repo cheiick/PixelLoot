@@ -47,7 +47,7 @@
         <div>
             <label class="block text-sm font-medium mb-1">Image actuelle</label>
             @if($product->image_path)
-                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($product->image_path) }}" alt="{{ $product->name }}" class="h-32 mb-2">
+                <img src="{{ \App\Support\ImageStorage::url($product->image_path) }}" alt="{{ $product->name }}" class="h-32 mb-2">
             @elseif($product->image_url)
                 <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="h-32 mb-2">
             @else

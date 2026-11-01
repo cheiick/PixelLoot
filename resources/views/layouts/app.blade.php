@@ -73,7 +73,7 @@
         <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
             <a href="{{ route('home') }}" class="flex min-w-0 shrink-0 items-center gap-2 font-bold text-xl tracking-tight">
                 @if($siteSettings->get('site_logo'))
-                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($siteSettings->get('site_logo')) }}" alt="{{ $siteSettings->get('site_name', 'MonShop') }}" class="max-h-10 max-w-36 object-contain sm:max-h-14 sm:max-w-48 lg:max-h-16 lg:max-w-64">
+                    <img src="{{ \App\Support\ImageStorage::url($siteSettings->get('site_logo')) }}" alt="{{ $siteSettings->get('site_name', 'MonShop') }}" class="max-h-10 max-w-36 object-contain sm:max-h-14 sm:max-w-48 lg:max-h-16 lg:max-w-64">
                 @else
                     <span class="max-w-36 truncate sm:max-w-56">{{ $siteSettings->get('site_name', 'MonShop') }}</span><span class="-ml-2 text-blue-500">.</span>
                 @endif
@@ -213,7 +213,7 @@
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
                 @if($siteSettings->get('site_logo'))
-                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($siteSettings->get('site_logo')) }}" alt="{{ $siteSettings->get('site_name', 'MonShop') }}" class="max-h-10 max-w-40 object-contain mb-4">
+                    <img src="{{ \App\Support\ImageStorage::url($siteSettings->get('site_logo')) }}" alt="{{ $siteSettings->get('site_name', 'MonShop') }}" class="max-h-10 max-w-40 object-contain mb-4">
                 @else
                     <h2 class="text-white text-lg font-bold mb-4">{{ $siteSettings->get('site_name', 'MonShop') }}</h2>
                 @endif

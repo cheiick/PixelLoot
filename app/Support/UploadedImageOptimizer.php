@@ -69,10 +69,14 @@ class UploadedImageOptimizer
         }
 
         $path = $directory.'/'.Str::uuid().'.webp';
-        if (! Storage::disk('public')->put($path, $webp)) {
+        $diskName = config('filesystems.image_disk', 'public');
+        $disk = Storage::disk($diskName);
+        if (! $disk->put($path, $webp)) {
             throw new RuntimeException('Impossible d’enregistrer l’image optimisée.');
         }
 
-        return $path;
+        return $diskName === 'cloudinary'
+            ? $disk->url($path)
+            : $path;
     }
 }

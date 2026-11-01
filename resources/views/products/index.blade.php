@@ -20,7 +20,7 @@
     >
         @foreach($heroImages as $index => $image)
             <img
-                src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($image) }}"
+                src="{{ \App\Support\ImageStorage::url($image) }}"
                 alt=""
                 class="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000"
                 :class="activeSlide === {{ $index }} ? 'opacity-100' : 'opacity-0'"
@@ -120,7 +120,7 @@
                             <a href="{{ route('products.show', $product) }}" class="block">
                                 <div class="aspect-square bg-gray-100 overflow-hidden relative">
                                     @if($product->image_path)
-                                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($product->image_path) }}" alt="{{ $product->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                        <img src="{{ \App\Support\ImageStorage::url($product->image_path) }}" alt="{{ $product->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                     @elseif($product->image_url)
                                         <img src="{{ $product->image_url }}" alt="{{ $product->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                     @else

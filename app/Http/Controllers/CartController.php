@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Coupon;
 use App\Models\Product;
+use App\Support\ImageStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Storage;
 
 class CartController extends Controller
 {
@@ -161,7 +161,7 @@ class CartController extends Controller
     private function productImageUrl(Product $product): ?string
     {
         if ($product->image_path) {
-            return Storage::disk('public')->url($product->image_path);
+            return ImageStorage::url($product->image_path);
         }
 
         return $product->image_url;
