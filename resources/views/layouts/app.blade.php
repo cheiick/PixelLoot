@@ -68,7 +68,7 @@
       data-currency-digits="{{ app(\App\Support\CurrencyFormatter::class)->fractionDigits() }}"
       data-app-locale="{{ app()->getLocale() }}"
       class="storefront-shell bg-gray-50 font-sans antialiased dark:bg-slate-950">
-    <header class="storefront-header sticky top-0 z-50 border-b text-slate-900" x-data="{ open: false }">
+    <header class="storefront-header sticky top-0 z-50 border-b text-slate-900" x-data="{ open: false, searchOpen: false }">
         <div class="bg-slate-900 px-4 py-2 text-center text-xs font-semibold tracking-wide text-white sm:text-sm">
             {{ __('Gaming, high-tech et nouveautés — découvrez la sélection') }}
         </div>
@@ -81,16 +81,37 @@
                 @endif
             </a>
 
-            <ul class="hidden items-center gap-9 lg:flex">
-                <li><a href="{{ route('home') }}" class="font-semibold transition hover:text-rose-600">{{ __('Accueil') }}</a></li>
-                <li><a href="{{ route('catalog.index') }}" class="font-semibold transition hover:text-rose-600">{{ __('Catalogue') }}</a></li>
+            <ul class="hidden items-center gap-4 xl:flex 2xl:gap-6">
+                <li><a href="{{ route('home') }}" class="whitespace-nowrap text-sm font-semibold transition hover:text-rose-600">{{ __('Accueil') }}</a></li>
+                <li><a href="{{ route('catalog.index') }}" class="whitespace-nowrap text-sm font-semibold transition hover:text-rose-600">{{ __('Catalogue') }}</a></li>
+                <li class="relative">
+                    <details class="group">
+                        <summary class="flex cursor-pointer list-none items-center gap-1 whitespace-nowrap text-sm font-semibold transition hover:text-rose-600 [&::-webkit-details-marker]:hidden">
+                            {{ __('Catégories') }}
+                            <svg class="h-4 w-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m6 9 6 6 6-6"/></svg>
+                        </summary>
+                        <div class="absolute left-0 top-full z-50 mt-3 min-w-56 rounded-xl border border-stone-200 bg-white p-2 shadow-xl">
+                            @forelse($navigationCategories as $category)
+                                <a href="{{ route('catalog.index', ['category' => $category->id]) }}" class="block rounded-lg px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-stone-50 hover:text-rose-600">{{ $category->name }}</a>
+                            @empty
+                                <a href="{{ route('catalog.index') }}" class="block rounded-lg px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-stone-50 hover:text-rose-600">{{ __('Toutes les catégories') }}</a>
+                            @endforelse
+                        </div>
+                    </details>
+                </li>
+                <li><a href="{{ route('catalog.index', ['sort' => 'newest']) }}" class="whitespace-nowrap text-sm font-semibold transition hover:text-rose-600">{{ __('Nouveautés') }}</a></li>
+                <li><a href="{{ route('pages.about') }}" class="whitespace-nowrap text-sm font-semibold transition hover:text-rose-600">{{ __('À propos') }}</a></li>
+                <li><a href="{{ route('pages.contact') }}" class="whitespace-nowrap text-sm font-semibold transition hover:text-rose-600">{{ __('Contact') }}</a></li>
             </ul>
 
             @php
                 $cartCount = collect(session('cart', []))->sum(fn ($item) => is_array($item) ? (int) ($item['quantity'] ?? 0) : 0);
             @endphp
 
-            <div class="hidden shrink-0 items-center gap-5 lg:flex">
+            <div class="hidden shrink-0 items-center gap-3 xl:flex 2xl:gap-4">
+                <button type="button" @click="searchOpen = !searchOpen" :aria-expanded="searchOpen.toString()" aria-controls="header-search" aria-label="{{ __('Rechercher') }}" class="rounded-full p-2 text-slate-700 transition hover:bg-stone-100 hover:text-rose-600">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke-width="1.8"/><path stroke-linecap="round" stroke-width="1.8" d="m16 16 4.5 4.5"/></svg>
+                </button>
                 <form action="{{ route('language.update') }}" method="POST" class="flex items-center">
                     @csrf
                     <label class="sr-only" for="desktop-language">{{ __('Langue') }}</label>
@@ -104,23 +125,24 @@
                     <svg data-theme-icon="sun" class="hidden h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" stroke-width="1.7" d="M12 2v2m0 16v2m10-10h-2M4 12H2m17.1-7.1-1.4 1.4M6.3 17.7l-1.4 1.4m14.2 0-1.4-1.4M6.3 6.3 4.9 4.9"/></svg>
                 </button>
                 @auth
-                    <a href="{{ route('dashboard') }}" class="font-medium transition hover:text-rose-600">{{ __('Mon compte') }}</a>
-                    <a href="{{ route('wishlist.index') }}" class="font-medium transition hover:text-rose-600">{{ __('Wishlist') }}</a>
+                    <a href="{{ route('dashboard') }}" class="whitespace-nowrap text-sm font-medium transition hover:text-rose-600">{{ __('Mon compte') }}</a>
+                    <a href="{{ route('wishlist.index') }}" aria-label="{{ __('Wishlist') }}" title="{{ __('Wishlist') }}" class="rounded-full p-2 text-slate-700 transition hover:bg-stone-100 hover:text-rose-600">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20.8 8.8c0 5.2-8.8 10-8.8 10s-8.8-4.8-8.8-10a4.8 4.8 0 0 1 8.8-2.5 4.8 4.8 0 0 1 8.8 2.5Z"/></svg>
+                    </a>
                     @if(auth()->user()->is_admin)
-                        <a href="{{ route('admin.dashboard') }}" class="font-medium transition hover:text-rose-600">{{ __('Administration') }}</a>
+                        <a href="{{ route('admin.dashboard') }}" class="whitespace-nowrap text-sm font-medium transition hover:text-rose-600">{{ __('Administration') }}</a>
                     @endif
                 @endauth
-                <a href="{{ route('cart.index') }}" aria-label="Panier ({{ $cartCount }} article(s))" class="relative inline-flex items-center gap-2 transition hover:text-rose-600">
+                <a href="{{ route('cart.index') }}" aria-label="Panier ({{ $cartCount }} article(s))" title="{{ __('Panier') }}" class="relative inline-flex items-center p-2 transition hover:text-rose-600">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18l-1.5 9H4.5L3 3z"/>
                         <circle cx="7.5" cy="20.5" r="1.5"/>
                         <circle cx="16.5" cy="20.5" r="1.5"/>
                     </svg>
-                    <span>{{ __('Panier') }}</span>
                     <span data-cart-count class="absolute -right-3 -top-2 {{ $cartCount > 0 ? '' : 'hidden' }} flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1 text-xs font-bold text-white">{{ $cartCount }}</span>
                 </a>
                 @guest
-                    <a href="{{ route('login') }}" class="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-600">{{ __('Se connecter') }}</a>
+                    <a href="{{ route('login') }}" class="whitespace-nowrap rounded-full bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-600">{{ __('Se connecter') }}</a>
                 @else
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -129,7 +151,10 @@
                 @endguest
             </div>
 
-            <div class="flex shrink-0 items-center gap-2 sm:gap-4 lg:hidden">
+            <div class="flex shrink-0 items-center gap-2 sm:gap-4 xl:hidden">
+                <button type="button" @click="searchOpen = !searchOpen; open = false" :aria-expanded="searchOpen.toString()" aria-controls="header-search" aria-label="{{ __('Rechercher') }}" class="rounded-full p-2 text-slate-700">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke-width="1.8"/><path stroke-linecap="round" stroke-width="1.8" d="m16 16 4.5 4.5"/></svg>
+                </button>
                 <button type="button" data-theme-toggle aria-label="Activer ou désactiver le mode sombre" aria-pressed="false" class="rounded-full p-2 text-slate-700">
                     <svg data-theme-icon="moon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M20.2 15.4A8.5 8.5 0 0 1 8.6 3.8 8.5 8.5 0 1 0 20.2 15.4Z"/></svg>
                     <svg data-theme-icon="sun" class="hidden h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" stroke-width="1.7" d="M12 2v2m0 16v2m10-10h-2M4 12H2m17.1-7.1-1.4 1.4M6.3 17.7l-1.4 1.4m14.2 0-1.4-1.4M6.3 6.3 4.9 4.9"/></svg>
@@ -153,7 +178,15 @@
             </div>
         </nav>
 
-        <div id="mobile-navigation" x-show="open" x-transition.origin.top x-cloak class="storefront-mobile-nav border-t px-4 py-3 lg:hidden sm:px-6">
+        <div id="header-search" x-show="searchOpen" x-transition.origin.top x-cloak class="border-t border-stone-100 bg-white px-4 py-4">
+            <form action="{{ route('catalog.index') }}" method="GET" class="mx-auto flex max-w-7xl gap-2 sm:px-2">
+                <label class="sr-only" for="header-search-input">{{ __('Rechercher') }}</label>
+                <input id="header-search-input" type="search" name="search" value="{{ request('search') }}" maxlength="255" placeholder="{{ __('Nom du produit...') }}" class="min-w-0 flex-1 rounded-full border border-stone-200 px-4 py-2.5 text-sm">
+                <button type="submit" class="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-600">{{ __('Rechercher') }}</button>
+            </form>
+        </div>
+
+        <div id="mobile-navigation" x-show="open" x-transition.origin.top x-cloak class="storefront-mobile-nav border-t px-4 py-3 xl:hidden sm:px-6">
             <ul class="mx-auto max-w-7xl space-y-1">
                 <li>
                     <form action="{{ route('language.update') }}" method="POST" class="px-4 py-2">
@@ -167,6 +200,15 @@
                 </li>
                 <li><a @click="open = false" href="{{ route('home') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Accueil') }}</a></li>
                 <li><a @click="open = false" href="{{ route('catalog.index') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Catalogue') }}</a></li>
+                <li class="px-4 pt-3 text-xs font-bold uppercase tracking-wider text-slate-500">{{ __('Catégories') }}</li>
+                @forelse($navigationCategories as $category)
+                    <li><a @click="open = false" href="{{ route('catalog.index', ['category' => $category->id]) }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ $category->name }}</a></li>
+                @empty
+                    <li><a @click="open = false" href="{{ route('catalog.index') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Toutes les catégories') }}</a></li>
+                @endforelse
+                <li><a @click="open = false" href="{{ route('catalog.index', ['sort' => 'newest']) }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Nouveautés') }}</a></li>
+                <li><a @click="open = false" href="{{ route('pages.about') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('À propos') }}</a></li>
+                <li><a @click="open = false" href="{{ route('pages.contact') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Contact') }}</a></li>
                 @auth
                     <li><a @click="open = false" href="{{ route('dashboard') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Mon compte') }}</a></li>
                     <li><a @click="open = false" href="{{ route('wishlist.index') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Ma wishlist') }}</a></li>

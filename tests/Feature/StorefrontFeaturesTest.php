@@ -37,6 +37,26 @@ function createStorefrontTestProduct(array $attributes = []): Product
     ], $attributes));
 }
 
+it('shows storefront links and actual categories in the desktop and mobile navigation', function () {
+    $category = Category::create([
+        'name' => 'Consoles',
+        'slug' => 'consoles',
+    ]);
+
+    $this->withSession(['locale' => 'fr'])
+        ->get(route('home'))
+        ->assertOk()
+        ->assertSee(route('catalog.index'), false)
+        ->assertSee(route('catalog.index', ['sort' => 'newest']), false)
+        ->assertSee(route('catalog.index', ['category' => $category->id]), false)
+        ->assertSee(route('pages.about'), false)
+        ->assertSee(route('pages.contact'), false)
+        ->assertSee('Catégories')
+        ->assertSee('Nouveautés')
+        ->assertSee('Consoles')
+        ->assertSee('header-search-input', false);
+});
+
 it('filters products by brand and returns AJAX results with the selected filters', function () {
     $product = createStorefrontTestProduct();
     createStorefrontTestProduct([

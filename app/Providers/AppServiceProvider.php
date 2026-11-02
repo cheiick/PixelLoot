@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Mail\MailtrapApiTransport;
+use App\Models\Category;
 use App\Models\SiteSetting;
 use App\Support\CurrencyFormatter;
 use Illuminate\Support\Facades\Blade;
@@ -44,6 +45,10 @@ class AppServiceProvider extends ServiceProvider
             'products.index',
         ], function ($view): void {
             $view->with('siteSettings', SiteSetting::query()->pluck('value', 'key'));
+        });
+
+        View::composer('layouts.app', function ($view): void {
+            $view->with('navigationCategories', Category::query()->orderBy('name')->get(['id', 'name']));
         });
     }
 }

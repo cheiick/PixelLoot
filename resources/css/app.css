@@ -214,6 +214,21 @@ html.dark .storefront-header .text-slate-700 {
     color: #f1f3f2;
 }
 
+html.dark .storefront-header details > div,
+html.dark .storefront-header #header-search {
+    border-color: #2b383d;
+    background: #172126;
+}
+
+html.dark .storefront-header details > div a {
+    color: #e2e8f0;
+}
+
+html.dark .storefront-header details > div a:hover {
+    background: #26343a;
+    color: #ff8295;
+}
+
 html.dark .storefront-mobile-nav {
     background: #172126;
     color: #f1f3f2;
