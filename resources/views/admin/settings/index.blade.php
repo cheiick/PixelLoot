@@ -91,12 +91,18 @@
         </fieldset>
 
         <fieldset class="border-b pb-6 space-y-4">
-            <legend class="text-lg font-semibold mb-3">E-mails de commande (SMTP)</legend>
+            <legend class="text-lg font-semibold mb-3">E-mails de commande et newsletter</legend>
             <p class="text-sm text-gray-600">
-                Configurez un fournisseur SMTP, par exemple le SMTP de Brevo (offre gratuite soumise aux limites du fournisseur), ou celui de votre choix.
-                Après confirmation du paiement Stripe, le client reçoit le détail de sa commande et son statut. Les changements de statut dans le panel envoient également un e-mail.
-                Les identifiants sont chiffrés en base et le mot de passe n’est jamais réaffiché.
+                Activez l’envoi et configurez Mailtrap Email Sending API dans le serveur ou renseignez un fournisseur SMTP ci-dessous.
+                Après confirmation du paiement Stripe, le client reçoit le détail de sa commande ; les changements de statut et les inscriptions à la newsletter envoient également un e-mail.
+                Les identifiants SMTP sont chiffrés en base et le mot de passe n’est jamais réaffiché.
             </p>
+            @if(config('services.mailtrap.token'))
+                <p class="rounded bg-blue-50 p-3 text-sm text-blue-800">
+                    L’API Mailtrap Email Sending est activée dans la configuration du serveur et sera utilisée à la place du SMTP ci-dessous.
+                    Vérifiez que l’adresse expéditrice autorisée correspond à votre domaine Mailtrap.
+                </p>
+            @endif
             <label class="flex items-center gap-2 text-sm font-medium">
                 <input type="hidden" name="mail_enabled" value="0">
                 <input type="checkbox" name="mail_enabled" value="1" @checked(old('mail_enabled', $settings['mail_enabled']) === '1')>

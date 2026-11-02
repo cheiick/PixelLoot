@@ -1,8 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
-        <h1 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">{{ __('Votre panier') }}</h1>
+    <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-rose-600">{{ __('Votre sélection') }}</p>
+        <h1 class="mb-7 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">{{ __('Votre panier') }}</h1>
 
         @if(session('error'))
             <div class="mb-4 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700" role="alert">{{ session('error') }}</div>
@@ -19,8 +20,8 @@
                         $subtotal = $item['price'] * $item['quantity'];
                         $total += $subtotal;
                     @endphp
-                    <article data-cart-row data-unit-price="{{ $item['price'] }}" class="grid min-w-0 grid-cols-[4rem_minmax(0,1fr)] gap-3 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:grid-cols-[6rem_minmax(0,1fr)] sm:gap-5 sm:p-5">
-                        <div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl bg-gray-100 text-xs text-gray-500 dark:bg-slate-800 sm:h-24 sm:w-24">
+                    <article data-cart-row data-unit-price="{{ $item['price'] }}" class="storefront-form-card grid min-w-0 grid-cols-[4rem_minmax(0,1fr)] gap-3 p-3 dark:bg-slate-900 sm:grid-cols-[6rem_minmax(0,1fr)] sm:gap-5 sm:p-5">
+                        <div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl bg-stone-100 text-xs text-gray-500 dark:bg-slate-800 sm:h-24 sm:w-24">
                             @if($item['image'])
                                 <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}" class="h-full w-full object-cover">
                             @else
@@ -54,7 +55,7 @@
                 @endforeach
             </div>
 
-            <div class="mt-6 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+            <div class="storefront-form-card mt-6 p-4 dark:bg-slate-900 sm:p-6">
                 <p class="text-right text-lg font-bold text-gray-900 dark:text-white sm:text-xl">
                     {{ __('Total :') }}
                     <span data-cart-total data-raw-amount="{{ $total }}">@money($total)</span>
@@ -63,15 +64,15 @@
                     <a href="{{ route('catalog.index') }}" class="inline-flex min-h-12 items-center justify-center rounded-lg border border-gray-300 px-5 py-3 text-center font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-slate-700 dark:text-gray-100 dark:hover:bg-slate-800">
                         {{ __('Continuer les achats') }}
                     </a>
-                    <a href="{{ route('checkout.show') }}" class="inline-flex min-h-12 items-center justify-center rounded-lg bg-green-600 px-6 py-3 text-center font-semibold text-white shadow transition hover:bg-green-700">
+                    <a href="{{ route('checkout.show') }}" class="storefront-primary-button inline-flex min-h-12 items-center justify-center rounded-lg px-6 py-3 text-center font-bold text-white shadow transition">
                         {{ __('Passer la commande') }}
                     </a>
                 </div>
             </div>
         @else
-            <div class="rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-10">
+            <div class="storefront-form-card p-6 text-center dark:bg-slate-900 sm:p-10">
                 <p class="text-gray-600 dark:text-gray-300">{{ __('Votre panier est vide.') }}</p>
-                <a href="{{ route('catalog.index') }}" class="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-blue-600 px-5 py-2 font-semibold text-white transition hover:bg-blue-700">{{ __('Faire des achats') }}</a>
+                <a href="{{ route('catalog.index') }}" class="storefront-primary-button mt-4 inline-flex min-h-11 items-center justify-center rounded-lg px-5 py-2 font-semibold text-white">{{ __('Faire des achats') }}</a>
             </div>
         @endif
     </div>

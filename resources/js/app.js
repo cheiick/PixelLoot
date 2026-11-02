@@ -11,10 +11,12 @@ Alpine.start();
 
 document.addEventListener('DOMContentLoaded', () => {
     const isDark = document.documentElement.classList.contains('dark');
-    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
-        button.setAttribute('aria-pressed', isDark.toString());
-        button.textContent = isDark ? '☀️' : '🌙';
+    const updateThemeButtons = (darkMode) => document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+        button.setAttribute('aria-pressed', darkMode.toString());
+        button.querySelector('[data-theme-icon="moon"]')?.classList.toggle('hidden', darkMode);
+        button.querySelector('[data-theme-icon="sun"]')?.classList.toggle('hidden', !darkMode);
     });
+    updateThemeButtons(isDark);
 
     AOS.init({
         duration: 550,
@@ -43,10 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', () => {
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
-                toggle.setAttribute('aria-pressed', isDark.toString());
-                toggle.textContent = isDark ? '☀️' : '🌙';
-            });
+            updateThemeButtons(isDark);
         });
     });
 });

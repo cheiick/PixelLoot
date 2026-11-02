@@ -2,11 +2,13 @@
 
 namespace App\Providers;
 
+use App\Mail\MailtrapApiTransport;
 use App\Models\SiteSetting;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\Blade;
 use App\Support\CurrencyFormatter;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,8 +25,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Mail::extend('mailtrap_api', static function (array $config): MailtrapApiTransport {
+            return new MailtrapApiTransport(
+                $config['token'],
+                $config['endpoint'],
+                $config['category'] ?? 'Transactional',
+            );
+        });
+
         Blade::directive('money', static function (string $expression): string {
-            return "<?php echo e(app(".CurrencyFormatter::class."::class)->format({$expression})); ?>";
+            return '<?php echo e(app('.CurrencyFormatter::class."::class)->format({$expression})); ?>";
         });
 
         View::composer([

@@ -23,7 +23,7 @@
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS via CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -67,21 +67,23 @@
       data-currency-symbol="{{ app(\App\Support\CurrencyFormatter::class)->symbol() }}"
       data-currency-digits="{{ app(\App\Support\CurrencyFormatter::class)->fractionDigits() }}"
       data-app-locale="{{ app()->getLocale() }}"
-      class="bg-gray-50 font-sans antialiased dark:bg-slate-950">
-    <!-- Navbar -->
-    <header class="sticky top-0 z-50 bg-slate-900 text-white shadow-lg" x-data="{ open: false }">
+      class="storefront-shell bg-gray-50 font-sans antialiased dark:bg-slate-950">
+    <header class="storefront-header sticky top-0 z-50 border-b text-slate-900" x-data="{ open: false }">
+        <div class="bg-slate-900 px-4 py-2 text-center text-xs font-semibold tracking-wide text-white sm:text-sm">
+            {{ __('Gaming, high-tech et nouveautés — découvrez la sélection') }}
+        </div>
         <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
             <a href="{{ route('home') }}" class="flex min-w-0 shrink-0 items-center gap-2 font-bold text-xl tracking-tight">
                 @if($siteSettings->get('site_logo'))
-                    <img src="{{ \App\Support\ImageStorage::url($siteSettings->get('site_logo')) }}" alt="{{ $siteSettings->get('site_name', 'MonShop') }}" class="max-h-10 max-w-36 object-contain sm:max-h-14 sm:max-w-48 lg:max-h-16 lg:max-w-64">
+                    <img src="{{ \App\Support\ImageStorage::url($siteSettings->get('site_logo')) }}" alt="{{ $siteSettings->get('site_name', 'MonShop') }}" class="max-h-10 max-w-36 object-contain sm:max-h-12 sm:max-w-48 lg:max-h-14 lg:max-w-64">
                 @else
-                    <span class="max-w-36 truncate sm:max-w-56">{{ $siteSettings->get('site_name', 'MonShop') }}</span><span class="-ml-2 text-blue-500">.</span>
+                    <span class="max-w-36 truncate sm:max-w-56">{{ $siteSettings->get('site_name', 'MonShop') }}</span><span class="-ml-2 text-rose-500">.</span>
                 @endif
             </a>
 
-            <ul class="hidden items-center gap-8 lg:flex">
-                <li><a href="{{ route('home') }}" class="font-medium transition hover:text-blue-400">{{ __('Accueil') }}</a></li>
-                <li><a href="{{ route('catalog.index') }}" class="font-medium transition hover:text-blue-400">{{ __('Catalogue') }}</a></li>
+            <ul class="hidden items-center gap-9 lg:flex">
+                <li><a href="{{ route('home') }}" class="font-semibold transition hover:text-rose-600">{{ __('Accueil') }}</a></li>
+                <li><a href="{{ route('catalog.index') }}" class="font-semibold transition hover:text-rose-600">{{ __('Catalogue') }}</a></li>
             </ul>
 
             @php
@@ -92,49 +94,55 @@
                 <form action="{{ route('language.update') }}" method="POST" class="flex items-center">
                     @csrf
                     <label class="sr-only" for="desktop-language">{{ __('Langue') }}</label>
-                    <select id="desktop-language" name="locale" onchange="this.form.submit()" aria-label="{{ __('Choisir la langue') }}" class="rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-sm text-white">
+                    <select id="desktop-language" name="locale" onchange="this.form.submit()" aria-label="{{ __('Choisir la langue') }}" class="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-sm text-slate-900">
                         <option value="fr" @selected(app()->getLocale() === 'fr')>FR</option>
                         <option value="en" @selected(app()->getLocale() === 'en')>EN</option>
                     </select>
                 </form>
-                <button type="button" data-theme-toggle aria-label="Activer ou désactiver le mode sombre" aria-pressed="false" class="rounded-lg px-2 py-1 text-xl transition hover:bg-slate-800">🌙</button>
+                <button type="button" data-theme-toggle aria-label="Activer ou désactiver le mode sombre" aria-pressed="false" class="rounded-full p-2 text-slate-700 transition hover:bg-stone-100" title="Changer de thème">
+                    <svg data-theme-icon="moon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M20.2 15.4A8.5 8.5 0 0 1 8.6 3.8 8.5 8.5 0 1 0 20.2 15.4Z"/></svg>
+                    <svg data-theme-icon="sun" class="hidden h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" stroke-width="1.7" d="M12 2v2m0 16v2m10-10h-2M4 12H2m17.1-7.1-1.4 1.4M6.3 17.7l-1.4 1.4m14.2 0-1.4-1.4M6.3 6.3 4.9 4.9"/></svg>
+                </button>
                 @auth
-                    <a href="{{ route('dashboard') }}" class="font-medium transition hover:text-blue-400">{{ __('Mon compte') }}</a>
-                    <a href="{{ route('wishlist.index') }}" class="font-medium transition hover:text-blue-400">{{ __('Wishlist') }}</a>
+                    <a href="{{ route('dashboard') }}" class="font-medium transition hover:text-rose-600">{{ __('Mon compte') }}</a>
+                    <a href="{{ route('wishlist.index') }}" class="font-medium transition hover:text-rose-600">{{ __('Wishlist') }}</a>
                     @if(auth()->user()->is_admin)
-                        <a href="{{ route('admin.dashboard') }}" class="font-medium transition hover:text-blue-400">{{ __('Administration') }}</a>
+                        <a href="{{ route('admin.dashboard') }}" class="font-medium transition hover:text-rose-600">{{ __('Administration') }}</a>
                     @endif
                 @endauth
-                <a href="{{ route('cart.index') }}" aria-label="Panier ({{ $cartCount }} article(s))" class="relative inline-flex items-center gap-2 transition hover:text-blue-400">
+                <a href="{{ route('cart.index') }}" aria-label="Panier ({{ $cartCount }} article(s))" class="relative inline-flex items-center gap-2 transition hover:text-rose-600">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18l-1.5 9H4.5L3 3z"/>
                         <circle cx="7.5" cy="20.5" r="1.5"/>
                         <circle cx="16.5" cy="20.5" r="1.5"/>
                     </svg>
                     <span>{{ __('Panier') }}</span>
-                    <span data-cart-count class="absolute -right-3 -top-2 {{ $cartCount > 0 ? '' : 'hidden' }} flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 text-xs font-bold text-white">{{ $cartCount }}</span>
+                    <span data-cart-count class="absolute -right-3 -top-2 {{ $cartCount > 0 ? '' : 'hidden' }} flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1 text-xs font-bold text-white">{{ $cartCount }}</span>
                 </a>
                 @guest
-                    <a href="{{ route('login') }}" class="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold transition hover:bg-blue-700">{{ __('Se connecter') }}</a>
+                    <a href="{{ route('login') }}" class="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-600">{{ __('Se connecter') }}</a>
                 @else
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="font-medium transition hover:text-red-400">{{ __('Déconnexion') }}</button>
+                        <button type="submit" class="font-medium transition hover:text-rose-600">{{ __('Déconnexion') }}</button>
                     </form>
                 @endguest
             </div>
 
             <div class="flex shrink-0 items-center gap-2 sm:gap-4 lg:hidden">
-                <button type="button" data-theme-toggle aria-label="Activer ou désactiver le mode sombre" aria-pressed="false" class="rounded-lg px-1 py-1 text-lg sm:text-xl">🌙</button>
-                <a href="{{ route('cart.index') }}" aria-label="Panier ({{ $cartCount }} article(s))" class="relative inline-flex items-center text-white">
+                <button type="button" data-theme-toggle aria-label="Activer ou désactiver le mode sombre" aria-pressed="false" class="rounded-full p-2 text-slate-700">
+                    <svg data-theme-icon="moon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M20.2 15.4A8.5 8.5 0 0 1 8.6 3.8 8.5 8.5 0 1 0 20.2 15.4Z"/></svg>
+                    <svg data-theme-icon="sun" class="hidden h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" stroke-width="1.7" d="M12 2v2m0 16v2m10-10h-2M4 12H2m17.1-7.1-1.4 1.4M6.3 17.7l-1.4 1.4m14.2 0-1.4-1.4M6.3 6.3 4.9 4.9"/></svg>
+                </button>
+                <a href="{{ route('cart.index') }}" aria-label="Panier ({{ $cartCount }} article(s))" class="relative inline-flex items-center text-slate-900">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18l-1.5 9H4.5L3 3z"/>
                         <circle cx="7.5" cy="20.5" r="1.5"/>
                         <circle cx="16.5" cy="20.5" r="1.5"/>
                     </svg>
-                    <span data-cart-count class="absolute -right-2 -top-2 {{ $cartCount > 0 ? '' : 'hidden' }} flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 text-xs font-bold text-white">{{ $cartCount }}</span>
+                    <span data-cart-count class="absolute -right-2 -top-2 {{ $cartCount > 0 ? '' : 'hidden' }} flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1 text-xs font-bold text-white">{{ $cartCount }}</span>
                 </a>
-                <button type="button" @click="open = !open" :aria-expanded="open.toString()" aria-controls="mobile-navigation" aria-label="Ouvrir ou fermer le menu" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-700 transition hover:bg-slate-800">
+                <button type="button" @click="open = !open" :aria-expanded="open.toString()" aria-controls="mobile-navigation" aria-label="Ouvrir ou fermer le menu" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 text-slate-900 transition hover:bg-stone-100">
                     <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
@@ -145,13 +153,13 @@
             </div>
         </nav>
 
-        <div id="mobile-navigation" x-show="open" x-transition.origin.top x-cloak class="border-t border-slate-700 bg-slate-900 px-4 py-3 lg:hidden sm:px-6">
+        <div id="mobile-navigation" x-show="open" x-transition.origin.top x-cloak class="storefront-mobile-nav border-t px-4 py-3 lg:hidden sm:px-6">
             <ul class="mx-auto max-w-7xl space-y-1">
                 <li>
                     <form action="{{ route('language.update') }}" method="POST" class="px-4 py-2">
                         @csrf
-                        <label for="mobile-language" class="mr-3 text-sm text-slate-300">{{ __('Langue') }}</label>
-                        <select id="mobile-language" name="locale" onchange="this.form.submit()" aria-label="{{ __('Choisir la langue') }}" class="rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white">
+                        <label for="mobile-language" class="mr-3 text-sm text-slate-500">{{ __('Langue') }}</label>
+                        <select id="mobile-language" name="locale" onchange="this.form.submit()" aria-label="{{ __('Choisir la langue') }}" class="rounded-md border border-stone-200 bg-white px-3 py-2 text-sm text-slate-900">
                             <option value="fr" @selected(app()->getLocale() === 'fr')>Français</option>
                             <option value="en" @selected(app()->getLocale() === 'en')>English</option>
                         </select>
@@ -192,28 +200,33 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-slate-900 text-gray-400 py-12 px-4 border-t border-slate-800">
-        <div class="mx-auto mb-10 max-w-3xl text-center">
-            <h2 class="text-xl font-bold text-white">{{ __('Recevez nos nouveautés') }}</h2>
-            <p class="mt-2 text-sm">{{ __('Inscrivez-vous à la newsletter pour suivre les nouveaux produits et offres.') }}</p>
-            @if(session('newsletter_success'))
-                <p class="mt-3 text-sm text-green-300" role="status">{{ session('newsletter_success') }}</p>
-            @endif
-            @if(session('newsletter_error'))
-                <p class="mt-3 text-sm text-amber-300" role="alert">{{ session('newsletter_error') }}</p>
-            @endif
-            @error('email')
-                <p class="mt-3 text-sm text-red-300" role="alert">{{ $message }}</p>
-            @enderror
-            <form action="{{ route('newsletter.store') }}" method="POST" class="mx-auto mt-4 flex max-w-xl flex-col gap-2 sm:flex-row">
-                @csrf
-                <label for="newsletter-email" class="sr-only">Votre adresse e-mail</label>
-                <input id="newsletter-email" type="email" name="email" value="{{ old('email') }}" required maxlength="255" placeholder="vous@exemple.fr"
-                    class="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-white placeholder:text-gray-400">
-                <button type="submit" class="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700">{{ __('S’inscrire') }}</button>
-            </form>
+    <footer class="storefront-footer border-t border-slate-800 px-4 py-10 sm:px-6 lg:px-8">
+        <div class="storefront-newsletter mx-auto mb-12 grid max-w-7xl items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.9fr)]">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-[0.18em] text-rose-300">{{ $siteSettings->get('site_name', 'MonShop') }}</p>
+                <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">{{ __('Recevez nos nouveautés') }}</h2>
+                <p class="mt-2 max-w-xl text-sm leading-6 text-slate-300">{{ __('Inscrivez-vous à la newsletter pour suivre les nouveaux produits et offres.') }}</p>
+            </div>
+            <div>
+                @if(session('newsletter_success'))
+                    <p class="mb-3 text-sm text-green-300" role="status">{{ session('newsletter_success') }}</p>
+                @endif
+                @if(session('newsletter_error'))
+                    <p class="mb-3 text-sm text-amber-300" role="alert">{{ session('newsletter_error') }}</p>
+                @endif
+                @error('email')
+                    <p class="mb-3 text-sm text-red-300" role="alert">{{ $message }}</p>
+                @enderror
+                <form action="{{ route('newsletter.store') }}" method="POST" class="flex w-full flex-col gap-2 sm:flex-row">
+                    @csrf
+                    <label for="newsletter-email" class="sr-only">Votre adresse e-mail</label>
+                    <input id="newsletter-email" type="email" name="email" value="{{ old('email') }}" required maxlength="255" placeholder="vous@exemple.fr"
+                        class="min-w-0 flex-1 rounded-lg border px-4 py-3 text-white placeholder:text-gray-400">
+                    <button type="submit" class="rounded-lg px-5 py-3 font-bold text-white transition">{{ __('S’inscrire') }}</button>
+                </form>
+            </div>
         </div>
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="mx-auto grid max-w-7xl grid-cols-1 gap-10 md:grid-cols-3">
             <div>
                 @if($siteSettings->get('site_logo'))
                     <img src="{{ \App\Support\ImageStorage::url($siteSettings->get('site_logo')) }}" alt="{{ $siteSettings->get('site_name', 'MonShop') }}" class="max-h-10 max-w-40 object-contain mb-4">
@@ -229,7 +242,7 @@
                 <a href="{{ route('cart.index') }}" class="block mb-2 hover:text-blue-400 transition text-sm">Mon Panier</a>
                 <a href="{{ route('pages.about') }}" class="block mb-2 hover:text-blue-400 transition text-sm">À propos</a>
                 <a href="{{ route('pages.contact') }}" class="block mb-2 hover:text-blue-400 transition text-sm">Contact</a>
-                <a href="{{ route('pages.legal') }}" class="block mb-2 hover:text-blue-4? transition text-sm">Mentions légales</a>
+                <a href="{{ route('pages.legal') }}" class="block mb-2 text-sm transition hover:text-white">Mentions légales</a>
             </div>
             <div>
                 <h3 class="text-white font-semibold mb-4">Contact</h3>

@@ -3,15 +3,16 @@
 @section('meta_description', 'Parcourez notre catalogue de produits gaming et high-tech. Filtrez par marque, catégorie, prix et disponibilité.')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8 dark:bg-slate-950">
+<div class="min-h-screen bg-gray-50 py-8 dark:bg-slate-950 sm:py-12">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ __('Tous nos produits') }}</h1>
-            <p class="mt-2 text-gray-600 dark:text-gray-300"><span data-result-count>{{ $products->total() }}</span> {{ __('produits disponibles') }}</p>
+        <div class="mb-8 border-b border-stone-200 pb-7 dark:border-slate-800">
+            <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-rose-600">{{ __('La boutique') }}</p>
+            <h1 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">{{ __('Tous nos produits') }}</h1>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300"><span data-result-count>{{ $products->total() }}</span> {{ __('produits disponibles') }}</p>
         </div>
 
         <div class="flex flex-col gap-8 lg:flex-row">
-            <aside class="h-fit flex-shrink-0 rounded-xl bg-white p-6 shadow dark:bg-slate-900 lg:sticky lg:top-24 lg:w-64">
+            <aside class="storefront-form-card h-fit flex-shrink-0 p-5 dark:bg-slate-900 sm:p-6 lg:sticky lg:top-28 lg:w-64">
                 <form method="GET" action="{{ route('catalog.index') }}" data-catalog-form class="space-y-4">
                     <div>
                         <label for="catalog-search" class="mb-2 block text-sm font-semibold text-gray-900 dark:text-white">{{ __('Rechercher') }}</label>
@@ -59,8 +60,8 @@
                         <input type="checkbox" name="in_stock" value="1" @checked(request('in_stock') === '1') class="rounded text-blue-600">
                         {{ __('En stock uniquement') }}
                     </label>
-                    <button type="submit" class="w-full rounded-lg bg-blue-600 py-2 font-semibold text-white transition hover:bg-blue-700">{{ __('Appliquer les filtres') }}</button>
-                    <a href="{{ route('catalog.index') }}" class="block text-center text-sm text-blue-600 hover:underline">{{ __('Réinitialiser') }}</a>
+                    <button type="submit" class="storefront-primary-button w-full rounded-lg py-3 font-bold text-white transition">{{ __('Appliquer les filtres') }}</button>
+                    <a href="{{ route('catalog.index') }}" class="block text-center text-sm font-medium text-gray-500 transition hover:text-rose-600">{{ __('Réinitialiser') }}</a>
                 </form>
             </aside>
 

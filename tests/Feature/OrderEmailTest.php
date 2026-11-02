@@ -7,7 +7,9 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\SiteSetting;
 use App\Models\User;
+use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
 function configureOrderEmailSmtp(): void
@@ -164,4 +166,50 @@ it('stores SMTP credentials encrypted and supports sending a test email from adm
         ->assertRedirect(route('admin.settings.index'))
         ->assertSessionHas('mail_test_success');
     Mail::assertSentCount(1);
+});
+
+it('sends the admin test email through Mailtrap API without requiring SMTP credentials', function () {
+    config([
+        'services.mailtrap.token' => 'mailtrap-test-token',
+        'services.mailtrap.endpoint' => 'https://send.api.mailtrap.io/api/send',
+        'services.mailtrap.category' => 'PixelLoot',
+    ]);
+    $responses = Http::sequence()
+        ->push(['success' => true], 200)
+        ->push(['errors' => ['Unauthorized']], 401);
+    Http::fake(['https://send.api.mailtrap.io/api/send' => $responses]);
+    $admin = User::factory()->create(['is_admin' => true]);
+    $this->actingAs($admin);
+    $this->get(route('admin.settings.index'))->assertOk();
+
+    $this->put(route('admin.settings.update'), [
+        'site_name' => 'PixelLoot',
+        'currency' => 'EUR',
+        'currency_symbol' => '€',
+        'hero_title' => 'Gaming',
+        'hero_description' => 'La boutique.',
+        'footer_email' => 'contact@example.com',
+        'footer_phone' => '+221 77 000 00 00',
+        'mail_enabled' => '1',
+        'mail_from_address' => 'hello@example.com',
+        'mail_from_name' => 'PixelLoot',
+    ])->assertRedirect(route('admin.settings.index'));
+
+    $this->post(route('admin.settings.test-mail'), ['mail_test_email' => 'client@example.com'])
+        ->assertRedirect(route('admin.settings.index'))
+        ->assertSessionHas('mail_test_success');
+
+    $this->post(route('admin.settings.test-mail'), ['mail_test_email' => 'client@example.com'])
+        ->assertRedirect(route('admin.settings.index'))
+        ->assertSessionHas('mail_test_error');
+
+    Http::assertSent(function (ClientRequest $request): bool {
+        return $request->url() === 'https://send.api.mailtrap.io/api/send'
+            && $request->hasHeader('Authorization', 'Bearer mailtrap-test-token')
+            && $request->data()['from'] === ['email' => 'hello@example.com', 'name' => 'PixelLoot']
+            && $request->data()['to'] === [['email' => 'client@example.com']]
+            && $request->data()['subject'] === 'Test de configuration e-mail'
+            && $request->data()['category'] === 'PixelLoot'
+            && str_contains($request->data()['html'], 'correctement configuré');
+    });
 });

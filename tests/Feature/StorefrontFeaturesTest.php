@@ -6,12 +6,15 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductReview;
+use App\Models\SiteSetting;
 use App\Models\User;
 use App\Support\CloudinaryImageUploader;
 use App\Support\ConfiguredSmtpMailer;
 use App\Support\UploadedImageOptimizer;
+use Illuminate\Http\Client\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -220,6 +223,7 @@ it('records newsletter subscribers and supports tokenized unsubscribe links', fu
     Mail::fake();
     $smtpMailer = Mockery::mock(ConfiguredSmtpMailer::class);
     $smtpMailer->shouldReceive('configure')->once()->andReturn(true);
+    $smtpMailer->shouldReceive('mailerName')->once()->andReturn('smtp');
     $this->app->instance(ConfiguredSmtpMailer::class, $smtpMailer);
 
     $response = $this->from(route('home'))->post(route('newsletter.store'), ['email' => ' Client@Example.com ']);
@@ -247,6 +251,33 @@ it('records newsletter signup without trying the default mail transport when SMT
 
     $this->assertDatabaseHas('newsletter_subscribers', ['email' => 'client@example.com']);
     Mail::assertNothingOutgoing();
+});
+
+it('sends newsletter confirmations through the configured Mailtrap API', function () {
+    config([
+        'services.mailtrap.token' => 'mailtrap-test-token',
+        'services.mailtrap.endpoint' => 'https://send.api.mailtrap.io/api/send',
+        'services.mailtrap.category' => 'PixelLoot',
+    ]);
+    Http::fake([
+        'https://send.api.mailtrap.io/api/send' => Http::response(['success' => true], 200),
+    ]);
+    SiteSetting::query()->create(['key' => 'mail_enabled', 'value' => '1']);
+    SiteSetting::query()->create(['key' => 'mail_from_address', 'value' => 'hello@example.com']);
+    SiteSetting::query()->create(['key' => 'mail_from_name', 'value' => 'PixelLoot']);
+
+    $this->from(route('home'))
+        ->post(route('newsletter.store'), ['email' => 'client@example.com'])
+        ->assertRedirect(route('home'))
+        ->assertSessionHas('newsletter_success');
+
+    Http::assertSent(fn (Request $request): bool => $request->url() === 'https://send.api.mailtrap.io/api/send'
+        && $request->data()['to'] === [['email' => 'client@example.com']]
+        && $request->data()['category'] === 'PixelLoot'
+        && str_contains(
+            $request->data()['text'],
+            route('newsletter.unsubscribe', NewsletterSubscriber::firstOrFail()->unsubscribe_token)
+        ));
 });
 
 it('exposes review moderation and newsletter management to administrators', function () {

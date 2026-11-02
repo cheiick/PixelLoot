@@ -1,17 +1,19 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SmtpConnectionTest;
 use App\Models\SiteSetting;
+use App\Support\ConfiguredSmtpMailer;
+use App\Support\ImageStorage;
+use App\Support\UploadedImageOptimizer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\SmtpConnectionTest;
-use App\Support\ImageStorage;
 use Illuminate\Validation\ValidationException;
-use App\Support\UploadedImageOptimizer;
 
 class SettingController extends Controller
 {
@@ -53,6 +55,10 @@ class SettingController extends Controller
 
     public function update(Request $request)
     {
+        $smtpRequired = config('services.mailtrap.token')
+            ? 'nullable'
+            : 'required_if:mail_enabled,1';
+
         if ($request->filled('custom_currency_code')) {
             $request->merge(['custom_currency_code' => strtoupper($request->input('custom_currency_code'))]);
         }
@@ -76,8 +82,8 @@ class SettingController extends Controller
             'social_whatsapp' => ['nullable', 'url:http,https', 'max:2048'],
             'social_tiktok' => ['nullable', 'url:http,https', 'max:2048'],
             'mail_enabled' => ['nullable', 'boolean'],
-            'mail_smtp_host' => ['required_if:mail_enabled,1', 'nullable', 'string', 'max:255'],
-            'mail_smtp_port' => ['required_if:mail_enabled,1', 'nullable', 'integer', 'between:1,65535'],
+            'mail_smtp_host' => [$smtpRequired, 'string', 'max:255'],
+            'mail_smtp_port' => [$smtpRequired, 'integer', 'between:1,65535'],
             'mail_smtp_encryption' => ['nullable', 'in:tls,ssl'],
             'mail_smtp_username' => ['nullable', 'string', 'max:255'],
             'mail_smtp_password' => ['nullable', 'string', 'max:4096'],
@@ -87,6 +93,7 @@ class SettingController extends Controller
         ]);
 
         if ($request->boolean('mail_enabled')
+            && ! config('services.mailtrap.token')
             && ! $request->filled('mail_smtp_password')
             && SiteSetting::getValue('mail_smtp_password_encrypted') === '') {
             throw ValidationException::withMessages([
@@ -173,7 +180,7 @@ class SettingController extends Controller
         return back()->with('success', 'Paramètres mis à jour avec succès.');
     }
 
-    public function testMail(Request $request, \App\Support\ConfiguredSmtpMailer $smtpMailer)
+    public function testMail(Request $request, ConfiguredSmtpMailer $smtpMailer)
     {
         $validated = $request->validate([
             'mail_test_email' => ['required', 'email', 'max:255'],
@@ -181,14 +188,16 @@ class SettingController extends Controller
 
         try {
             if (! $smtpMailer->configure()) {
-                return back()->with('mail_test_error', 'Activez et enregistrez d’abord le serveur SMTP.');
+                return back()->with('mail_test_error', 'Activez et enregistrez d’abord un fournisseur e-mail.');
             }
 
-            Mail::to($validated['mail_test_email'])->send(new SmtpConnectionTest());
+            Mail::mailer($smtpMailer->mailerName())
+                ->to($validated['mail_test_email'])
+                ->send(new SmtpConnectionTest);
         } catch (\Throwable $exception) {
-            Log::error('SMTP configuration test failed.', ['exception' => $exception]);
+            Log::error('Email configuration test failed.', ['exception' => $exception]);
 
-            return back()->with('mail_test_error', 'Échec du test SMTP. Vérifiez le serveur, le port, le chiffrement et les identifiants.');
+            return back()->with('mail_test_error', 'Échec du test e-mail. Vérifiez la configuration du fournisseur et de l’adresse expéditrice.');
         }
 
         return back()->with('mail_test_success', 'E-mail de test envoyé.');

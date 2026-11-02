@@ -45,12 +45,12 @@ class NewsletterController extends Controller
 
             return back()->with(
                 'newsletter_error',
-                'Votre inscription est enregistrée, mais l’e-mail de confirmation n’a pas été envoyé : configurez et activez le SMTP dans les paramètres du site.'
+                'Votre inscription est enregistrée, mais l’e-mail de confirmation n’a pas été envoyé : configurez et activez un fournisseur e-mail dans les paramètres du site.'
             );
         }
 
         try {
-            Mail::mailer('smtp')->raw(
+            Mail::mailer($smtpMailer->mailerName())->raw(
                 "Merci pour votre inscription à notre newsletter.\n\nPour vous désinscrire, cliquez sur le lien suivant :\n"
                     .route('newsletter.unsubscribe', $subscriber->unsubscribe_token),
                 fn ($message) => $message->to($email)->subject('Confirmation de votre inscription à la newsletter')
@@ -63,7 +63,7 @@ class NewsletterController extends Controller
 
             return back()->with(
                 'newsletter_error',
-                'Votre inscription est enregistrée, mais le serveur SMTP n’a pas pu envoyer l’e-mail de confirmation. Vérifiez la configuration SMTP.'
+                'Votre inscription est enregistrée, mais le fournisseur e-mail n’a pas pu envoyer l’e-mail de confirmation. Vérifiez sa configuration.'
             );
         }
 

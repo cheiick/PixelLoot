@@ -28,8 +28,8 @@
         </nav>
 
         <div class="grid gap-8 lg:grid-cols-2 lg:gap-14">
-            <div class="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
-                <div class="relative aspect-square bg-gray-50">
+            <div class="storefront-form-card overflow-hidden">
+                <div class="relative aspect-square bg-stone-100">
                     @if($product->image_path)
                         <img src="{{ \App\Support\ImageStorage::url($product->image_path) }}" alt="{{ $product->name }}" fetchpriority="high" class="h-full w-full object-contain p-6 sm:p-10">
                     @elseif($product->image_url)
@@ -49,15 +49,15 @@
 
             <div class="flex flex-col py-2 lg:py-5">
                 @if($category)
-                    <a href="{{ route('catalog.index', ['category' => $category->id]) }}" class="mb-3 w-fit rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-700 transition hover:bg-blue-100">
+                    <a href="{{ route('catalog.index', ['category' => $category->id]) }}" class="mb-3 w-fit rounded-full bg-rose-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-rose-700 transition hover:bg-rose-100">
                         {{ $category->name }}
                     </a>
                 @endif
                 @if($product->brand)
-                    <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-blue-700">{{ $product->brand }}</p>
+                    <p class="mb-2 text-sm font-bold uppercase tracking-[0.14em] text-rose-700">{{ $product->brand }}</p>
                 @endif
 
-                <h1 class="break-words text-2xl font-bold tracking-tight text-gray-950 sm:text-4xl">{{ $product->name }}</h1>
+                <h1 class="break-words text-3xl font-extrabold tracking-tight text-gray-950 sm:text-4xl">{{ $product->name }}</h1>
                 <p class="mt-2 text-sm text-amber-600" aria-label="Note moyenne">
                     @if($reviewCount)
                         {{ str_repeat('★', (int) round($averageRating)) }}{{ str_repeat('☆', 5 - (int) round($averageRating)) }}
@@ -99,7 +99,7 @@
                 </div>
 
                 @if($product->stock > 0)
-                    <form action="{{ route('cart.add', $product) }}" method="POST" data-cart-add class="mt-auto rounded-2xl bg-gray-50 p-4 sm:p-5">
+                    <form action="{{ route('cart.add', $product) }}" method="POST" data-cart-add class="mt-auto rounded-2xl bg-stone-100 p-4 sm:p-5">
                         @csrf
                         <div class="flex flex-col gap-4 sm:flex-row sm:items-end">
                             <div>
@@ -116,7 +116,7 @@
                                 >
                             </div>
                             @auth
-                                <button type="submit" class="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                <button type="submit" class="storefront-primary-button inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-xl px-6 font-semibold text-white shadow-sm transition focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2">
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 3h2l2.2 11.2a2 2 0 002 1.6h8.7a2 2 0 001.9-1.4L22 8H6"/>
                                         <circle cx="10" cy="20" r="1"/>
@@ -125,7 +125,7 @@
                                     Ajouter au panier
                                 </button>
                             @else
-                                <a href="{{ route('login') }}" class="inline-flex h-12 flex-1 items-center justify-center rounded-xl bg-blue-600 px-6 text-center font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                                <a href="{{ route('login') }}" class="storefront-primary-button inline-flex h-12 flex-1 items-center justify-center rounded-xl px-6 text-center font-semibold text-white shadow-sm transition">
                                     Connectez-vous pour commander
                                 </a>
                             @endauth
@@ -133,7 +133,7 @@
                         <p class="mt-3 text-xs text-gray-500">Stock disponible : {{ $product->stock }} unité(s)</p>
                     </form>
                 @else
-                    <div class="mt-auto rounded-2xl bg-gray-50 p-5">
+                    <div class="mt-auto rounded-2xl bg-stone-100 p-5">
                         <p class="font-medium text-gray-700">Ce produit est actuellement indisponible.</p>
                     </div>
                 @endif
@@ -156,7 +156,7 @@
             </div>
             @auth
                 @if($canReview)
-                    <form action="{{ route('products.reviews.store', $product) }}" method="POST" class="mt-6 max-w-2xl space-y-4 rounded-2xl bg-gray-50 p-5">
+                    <form action="{{ route('products.reviews.store', $product) }}" method="POST" class="storefront-form-card mt-6 max-w-2xl space-y-4 p-5">
                         @csrf
                         <div>
                             <label for="rating" class="mb-2 block text-sm font-semibold text-gray-800">Votre note</label>
@@ -170,7 +170,7 @@
                             <label for="review-comment" class="mb-2 block text-sm font-semibold text-gray-800">Votre commentaire</label>
                             <textarea id="review-comment" name="comment" rows="4" minlength="10" maxlength="3000" required class="w-full rounded-lg border-gray-300" placeholder="Partagez votre expérience...">{{ old('comment') }}</textarea>
                         </div>
-                        <button type="submit" class="rounded-lg bg-blue-600 px-5 py-2.5 font-semibold text-white hover:bg-blue-700">Envoyer mon avis</button>
+                        <button type="submit" class="storefront-primary-button rounded-lg px-5 py-2.5 font-semibold text-white">Envoyer mon avis</button>
                     </form>
                 @endif
             @else
@@ -179,7 +179,7 @@
 
             <div class="mt-8 space-y-4">
                 @forelse($reviews as $review)
-                    <article data-aos="fade-up" class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                    <article data-aos="fade-up" class="storefront-form-card p-5">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <p class="font-semibold text-gray-900">{{ $review->user->name }}</p>
                             <span class="text-amber-600" aria-label="{{ $review->rating }} sur 5">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</span>

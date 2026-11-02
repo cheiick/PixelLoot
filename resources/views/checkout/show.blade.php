@@ -1,8 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <h1 class="text-3xl font-bold mb-6">{{ __('Passer la commande') }}</h1>
+    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-rose-600">{{ __('Dernière étape') }}</p>
+        <h1 class="mb-7 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">{{ __('Passer la commande') }}</h1>
 
         @if($errors->any())
             <div class="mb-6 rounded border border-red-300 bg-red-50 px-4 py-3 text-red-800">
@@ -28,15 +29,15 @@
             <p class="mb-4">{{ __('Votre panier est vide.') }}</p>
             <a href="{{ route('home') }}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">{{ __('Retour aux produits') }}</a>
         @else
-            <section class="mb-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h2 class="text-xl font-semibold mb-4">{{ __('Code promo') }}</h2>
+            <section class="storefront-form-card mb-8 p-5 sm:p-6">
+                <h2 class="mb-4 text-lg font-bold">{{ __('Code promo') }}</h2>
                 @if($coupon)
                     <div class="flex flex-wrap items-center justify-between gap-4">
                         <p>{{ __('Code') }} <strong>{{ $coupon->code }}</strong> {{ __('appliqué.') }}</p>
                         <form action="{{ route('cart.remove_coupon') }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:underline">{{ __('Retirer le code promo') }}</button>
+                            <button type="submit" class="font-semibold text-rose-600 hover:underline">{{ __('Retirer le code promo') }}</button>
                         </form>
                     </div>
                 @else
@@ -46,19 +47,19 @@
                             <label for="coupon_code" class="block text-sm font-medium mb-1">{{ __('Saisissez votre code promo') }}</label>
                             <input type="text" name="coupon_code" id="coupon_code" value="{{ old('coupon_code') }}" required maxlength="255" class="w-full border rounded px-3 py-2">
                         </div>
-                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">{{ __('Appliquer') }}</button>
+                        <button type="submit" class="storefront-primary-button rounded-lg px-5 py-2.5 font-semibold text-white">{{ __('Appliquer') }}</button>
                     </form>
                 @endif
             </section>
 
-            <form action="{{ route('checkout.store') }}" method="POST" class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
+            <form action="{{ route('checkout.store') }}" method="POST" class="storefront-form-card p-4 sm:p-6">
                 @csrf
                 <div class="mb-6">
                     <label for="address" class="block text-sm font-medium mb-2">{{ __('Adresse de livraison') }}</label>
                     <textarea id="address" name="address" rows="3" required maxlength="2000" class="w-full border rounded p-2">{{ old('address', auth()->user()->address) }}</textarea>
                 </div>
 
-                <h2 class="text-xl font-semibold mb-4">{{ __('Récapitulatif du panier') }}</h2>
+                <h2 class="mb-4 text-xl font-bold">{{ __('Récapitulatif du panier') }}</h2>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 mb-6">
                         <thead>
@@ -109,7 +110,7 @@
                     </table>
                 </div>
 
-                <button type="submit" class="min-h-12 w-full rounded bg-green-600 px-6 py-3 font-semibold text-white hover:bg-green-700 sm:w-auto">
+                <button type="submit" class="storefront-primary-button min-h-12 w-full rounded-lg px-6 py-3 font-bold text-white sm:w-auto">
                     {{ __('Procéder au paiement') }}
                 </button>
             </form>

@@ -5,12 +5,19 @@
 
 # E-mails de commande sur Render
 
-1. Dans le panel admin, ouvrez **Paramètres du site** et renseignez le serveur SMTP, le port, le chiffrement, les identifiants ainsi qu’une adresse expéditrice autorisée. Le SMTP de Brevo peut être utilisé avec son offre gratuite, selon ses limites et conditions en vigueur ; tout fournisseur SMTP compatible convient également.
+1. Dans le panel admin, ouvrez **Paramètres du site** et activez l’envoi. Configurez Mailtrap Email Sending API (section ci-dessous) ou, sans jeton Mailtrap, renseignez les paramètres SMTP et une adresse expéditrice autorisée.
 2. Enregistrez les paramètres puis utilisez **Envoyer un e-mail de test**. Le secret SMTP est chiffré avec `APP_KEY` et n’est pas réaffiché. Ne changez pas cette clé après avoir enregistré le secret, sinon Laravel ne pourra plus le déchiffrer.
 3. Dans Render, ajoutez `STRIPE_WEBHOOK_SECRET` avec le secret de signature du webhook Stripe. Configurez dans Stripe un webhook vers `https://<votre-domaine>/stripe/webhook` pour les événements `checkout.session.completed` et `checkout.session.async_payment_succeeded`.
 4. Appliquez les migrations de production avec `php artisan migrate --force`. Le démarrage du conteneur Render exécute aussi les migrations ; une migration resynchronise les séquences d’identifiants PostgreSQL avec les données existantes pour éviter les erreurs de clé primaire en double.
 
 Le reçu e-mail est envoyé à l’adresse du compte après confirmation du paiement par Stripe. Les changements de statut effectués par un administrateur déclenchent également un e-mail lorsqu’une adresse est disponible. L’URL de retour du client ne suffit pas à valider un paiement.
+
+# Envoi d’e-mails avec Mailtrap
+
+- Pour envoyer réellement les confirmations newsletter et les e-mails de commande, utilisez **Mailtrap Email Sending API**, et non les identifiants de l’inbox Sandbox SMTP.
+- Dans Render, ajoutez `MAILTRAP_API_TOKEN` avec le jeton API Email Sending. Ne le partagez pas et ne le commitez jamais. `MAILTRAP_API_URL` est facultatif (par défaut `https://send.api.mailtrap.io/api/send`) ; `MAILTRAP_CATEGORY` est facultatif (par défaut `Transactional`).
+- Activez l’envoi dans les paramètres du site et configurez-y une adresse expéditrice autorisée par Mailtrap. Si `MAILTRAP_API_TOKEN` est défini, l’application utilise l’API ; sinon elle utilise le SMTP enregistré dans le panel.
+- Mailtrap doit autoriser/vérifier le domaine expéditeur pour la livraison réelle. Consultez les journaux d’envoi sur [Mailtrap Email Logs](https://mailtrap.io/sending/email_logs).
 
 # Images et déploiement Render
 

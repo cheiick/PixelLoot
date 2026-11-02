@@ -28,7 +28,7 @@ class OrderStatusNotifier
             return;
         }
 
-        Mail::mailer('smtp')
+        Mail::mailer($mailer->mailerName())
             ->to($order->user->email)
             ->send(new OrderStatusUpdated($order));
 

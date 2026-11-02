@@ -40,4 +40,10 @@ return [
         'secret' => env('STRIPE_SECRET'),
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
+
+    'mailtrap' => [
+        'token' => env('MAILTRAP_API_TOKEN'),
+        'endpoint' => env('MAILTRAP_API_URL', 'https://send.api.mailtrap.io/api/send'),
+        'category' => env('MAILTRAP_CATEGORY', 'Transactional'),
+    ],
 ];
