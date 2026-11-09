@@ -25,41 +25,6 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS via CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-
-<!-- Alpine.js -->
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-<!-- AOS Animations -->
-<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-
-<!-- Configuration Tailwind personnalisée -->
-<script>
-    tailwind.config = {
-        darkMode: 'class',
-        theme: {
-            extend: {
-                colors: {
-                    primary: '#3b82f6',
-                    secondary: '#1e293b',
-                }
-            }
-        }
-    }
-</script>
-
-<!-- Initialisation AOS -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        AOS.init({
-            duration: 800,
-            once: true
-        });
-    });
-</script>
-
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js']) 
 </head>
@@ -383,7 +348,7 @@
             const sendCartRequest = async (url, method, data) => {
                 const requestUrl = new URL(url, window.location.href);
                 if (requestUrl.origin !== window.location.origin) {
-                    throw new Error('L’URL du panier ne correspond pas au domaine actuel. Vérifiez APP_URL dans Render.');
+                    throw new Error('L’URL du panier ne correspond pas au domaine actuel.');
                 }
 
                 let response;
@@ -399,7 +364,7 @@
                     body: JSON.stringify(data),
                     });
                 } catch {
-                    throw new Error('Connexion au panier impossible. Vérifiez que APP_URL utilise l’URL HTTPS de Render et réessayez.');
+                    throw new Error('Connexion au panier impossible. Veuillez vérifier votre connexion et réessayer.');
                 }
 
                 const responseBody = await response.text();
@@ -410,7 +375,7 @@
                     if (response.status === 413) {
                         throw new Error('La requête est trop volumineuse. Réduisez la taille des fichiers envoyés.');
                     }
-                    throw new Error(`Le serveur a répondu avec une page non JSON (HTTP ${response.status}). Consultez les journaux Render.`);
+                    throw new Error(`Le serveur a répondu avec une erreur (HTTP ${response.status}). Veuillez réessayer plus tard.`);
                 }
 
                 if (!response.ok) {

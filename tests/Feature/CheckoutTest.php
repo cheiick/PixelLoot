@@ -9,6 +9,37 @@ use App\Models\User;
 use App\Services\StripeCheckoutGateway;
 use Stripe\Exception\InvalidRequestException;
 
+it('requires a phone number before starting checkout', function () {
+    $category = Category::create(['name' => 'Électronique', 'slug' => 'electronique']);
+    $product = Product::create([
+        'category_id' => $category->id,
+        'name' => 'Casque audio',
+        'slug' => 'casque-audio',
+        'price' => 49.90,
+        'stock' => 5,
+    ]);
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->withSession(['cart' => [
+            $product->id => ['name' => $product->name, 'price' => $product->price, 'quantity' => 1],
+        ]])
+        ->from(route('checkout.show'))
+        ->post(route('checkout.store'), [
+            'email' => 'buyer@example.test',
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
+            'address' => '10 rue de Paris',
+            'city' => 'Paris',
+            'postal_code' => '75001',
+            'country' => 'France',
+        ])
+        ->assertRedirect(route('checkout.show'))
+        ->assertSessionHasErrors('phone');
+
+    expect(Order::count())->toBe(0);
+});
+
 it('creates an order with the correct total and updates product stock', function () {
     $category = Category::create([
         'name' => 'Électronique',
@@ -49,7 +80,16 @@ it('creates an order with the correct total and updates product stock', function
         ->assertSee('https://example.com/casque.jpg')
         ->assertSee('alt="Casque audio"', false);
 
-    $response = $checkout->post(route('checkout.store'), ['address' => '10 rue de Paris']);
+    $response = $checkout->post(route('checkout.store'), [
+        'email' => 'buyer@example.test',
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'phone' => '+33 6 12 34 56 78',
+        'address' => '10 rue de Paris',
+        'city' => 'Paris',
+        'postal_code' => '75001',
+        'country' => 'France',
+    ]);
 
     $order = Order::firstOrFail();
     $response->assertRedirect('https://checkout.example/session');
@@ -58,7 +98,12 @@ it('creates an order with the correct total and updates product stock', function
         'total' => '99.80',
         'currency_code' => 'EUR',
         'currency_symbol' => '€',
-        'address' => '10 rue de Paris',
+    ]);
+    expect($order->address)->toContain('10 rue de Paris', '+33612345678', 'buyer@example.test');
+    $this->assertDatabaseHas('users', [
+        'id' => $user->id,
+        'email' => 'buyer@example.test',
+        'phone' => '+33612345678',
     ]);
 
     $this->assertDatabaseHas('order_items', [
@@ -131,7 +176,16 @@ it('applies the selected coupon to the order and the Stripe checkout session', f
         ->assertSee('20')
         ->assertSee('180');
 
-    $this->post(route('checkout.store'), ['address' => '10 rue de Paris'])
+    $this->post(route('checkout.store'), [
+        'email' => 'buyer@example.test',
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'phone' => '+33 6 12 34 56 78',
+        'address' => '10 rue de Paris',
+        'city' => 'Paris',
+        'postal_code' => '75001',
+        'country' => 'France',
+    ])
         ->assertRedirect('https://checkout.example/session');
 
     $order = Order::firstOrFail();
@@ -182,7 +236,16 @@ it('charges and snapshots an administrator-selected XOF currency', function () {
         ->withSession(['cart' => [
             $product->id => ['name' => $product->name, 'price' => 1250, 'quantity' => 1],
         ]])
-        ->post(route('checkout.store'), ['address' => 'Dakar'])
+        ->post(route('checkout.store'), [
+            'email' => 'buyer@example.test',
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
+            'phone' => '+221 77 000 00 00',
+            'address' => '10 rue de Dakar',
+            'city' => 'Dakar',
+            'postal_code' => '10000',
+            'country' => 'Sénégal',
+        ])
         ->assertRedirect('https://checkout.example/session');
 
     $this->assertDatabaseHas('orders', [
@@ -221,7 +284,16 @@ it('explains Stripe minimum amount errors and keeps the cart without creating an
             $product->id => ['name' => $product->name, 'price' => 60, 'quantity' => 1],
         ]])
         ->from(route('checkout.show'))
-        ->post(route('checkout.store'), ['address' => 'Dakar'])
+        ->post(route('checkout.store'), [
+            'email' => 'buyer@example.test',
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
+            'phone' => '+221 77 000 00 00',
+            'address' => '10 rue de Dakar',
+            'city' => 'Dakar',
+            'postal_code' => '10000',
+            'country' => 'Sénégal',
+        ])
         ->assertRedirect(route('checkout.show'))
         ->assertSessionHasErrors('cart')
         ->assertSessionHas('cart');

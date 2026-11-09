@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Services\OrderStatusNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Exception\UnexpectedValueException;
 use Stripe\Webhook;
@@ -30,6 +32,33 @@ class StripeWebhookController extends Controller
             );
         } catch (UnexpectedValueException|SignatureVerificationException $exception) {
             return response('Invalid Stripe webhook signature or payload.', 400);
+        }
+
+        if ($event->type === 'checkout.session.expired') {
+            $session = $event->data->object;
+            $orderId = $session->metadata->order_id ?? null;
+
+            if (is_numeric($orderId)) {
+                $order = Order::with('items.product')->find($orderId);
+
+                if ($order && $order->status === 'pending') {
+                    DB::transaction(function () use ($order) {
+                        foreach ($order->items as $item) {
+                            if ($item->product) {
+                                $item->product->increment('stock', $item->quantity);
+                            }
+                        }
+
+                        if ($order->coupon_code) {
+                            Coupon::where('code', $order->coupon_code)->decrement('used_count');
+                        }
+
+                        $order->update(['status' => 'cancelled']);
+                    });
+                }
+            }
+
+            return response('Session expired handled.', 200);
         }
 
         if (! in_array($event->type, ['checkout.session.completed', 'checkout.session.async_payment_succeeded'], true)) {

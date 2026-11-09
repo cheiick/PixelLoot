@@ -52,7 +52,15 @@ class Product extends Model
                 $base = \Illuminate\Support\Str::slug($product->name);
                 $slug = $base;
                 $i = 1;
-                while (static::where('slug', $slug)->where('id', '!=', $product->id)->exists()) {
+                $checkSlug = function ($candidate) use ($product) {
+                    $query = static::where('slug', $candidate);
+                    if ($product->exists) {
+                        $query->where('id', '!=', $product->id);
+                    }
+                    return $query->exists();
+                };
+
+                while ($checkSlug($slug)) {
                     $slug = $base . '-' . $i++;
                 }
                 $product->slug = $slug;

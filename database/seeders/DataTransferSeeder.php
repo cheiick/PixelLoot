@@ -11,33 +11,38 @@ class DataTransferSeeder extends Seeder
 {
     public function run()
     {
-        echo "🔄 Transfert MySQL → PostgreSQL (Render)...\n\n";
+        echo "🔄 Transfert MySQL → PostgreSQL...\n\n";
 
-        // 1. Définir dynamiquement la connexion MySQL locale (en dur)
+        // 1. Définir dynamiquement la connexion MySQL locale
         Config::set('database.connections.mysql_temp', [
             'driver' => 'mysql',
-            'host' => '127.0.0.1',
-            'port' => '3306',
-            'database' => 'ecommerce_db',
-            'username' => 'root',
-            'password' => '',
+            'host' => env('TRANSFER_MYSQL_HOST', '127.0.0.1'),
+            'port' => env('TRANSFER_MYSQL_PORT', '3306'),
+            'database' => env('TRANSFER_MYSQL_DATABASE', 'ecommerce_db'),
+            'username' => env('TRANSFER_MYSQL_USERNAME', 'root'),
+            'password' => env('TRANSFER_MYSQL_PASSWORD', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
         ]);
 
-        // 2. Définir dynamiquement la connexion PostgreSQL Render (en dur)
+        // 2. Définir dynamiquement la connexion PostgreSQL distante (via variables d'environnement)
         Config::set('database.connections.pgsql_temp', [
             'driver' => 'pgsql',
-            'host' => 'dpg-dbieg1ijnfac73bf49ag-a.frankfurt-postgres.render.com',
-            'port' => '5432',
-            'database' => 'monshop_db_lzgw',
-            'username' => 'monshop_db_lzgw_user',
-            'password' => 'DD4TRCLRQiAloaKjnbh6lIpHROdXa3PC', // ⚠️ REMPLACE CECI PAR TON VRAI MDP
+            'host' => env('TRANSFER_PGSQL_HOST', ''),
+            'port' => env('TRANSFER_PGSQL_PORT', '5432'),
+            'database' => env('TRANSFER_PGSQL_DATABASE', ''),
+            'username' => env('TRANSFER_PGSQL_USERNAME', ''),
+            'password' => env('TRANSFER_PGSQL_PASSWORD', ''),
             'charset' => 'utf8',
             'prefix' => '',
             'schema' => 'public',
-            'sslmode' => 'require', // Obligatoire pour Render
+            'sslmode' => 'require',
         ]);
+
+        if (empty(env('TRANSFER_PGSQL_HOST'))) {
+            echo "⚠️  Variables TRANSFER_PGSQL_* non configurées. Veuillez les définir dans .env pour exécuter le transfert.\n";
+            return;
+        }
 
         $tables = [
             'categories', 'products', 'users', 'orders', 
@@ -54,7 +59,6 @@ class DataTransferSeeder extends Seeder
     private function transferTable($table)
     {
         try {
-            // On utilise les NOMS des connexions temporaires (chaînes de caractères)
             $source = 'mysql_temp';
             $dest = 'pgsql_temp';
 

@@ -45,7 +45,7 @@ class NewsletterController extends Controller
 
             return back()->with(
                 'newsletter_error',
-                'Votre inscription est enregistrée, mais l’e-mail de confirmation n’a pas été envoyé : configurez et activez un fournisseur e-mail dans les paramètres du site.'
+                'Votre inscription est bien enregistrée, mais l’e-mail de confirmation n’a pas pu être envoyé pour le moment.'
             );
         }
 

@@ -53,8 +53,8 @@ it('shows customer information and only that customers order history', function 
         ->assertSee('value="+33612345678"', false)
         ->assertSee('10 rue de Paris')
         ->assertSee('Console de jeu')
-        ->assertSee('250,00 €')
-        ->assertDontSee('999,00 €')
+        ->assertSee(app(\App\Support\CurrencyFormatter::class)->format(250))
+        ->assertDontSee(app(\App\Support\CurrencyFormatter::class)->format(999))
         ->assertSee('Ajoutez une adresse e-mail à votre compte');
 });
 

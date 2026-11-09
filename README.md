@@ -1,4 +1,11 @@
 
+# Connexion Google
+
+- Dans la console Google Cloud, créez un identifiant OAuth client de type application Web et ajoutez `https://<votre-domaine>/auth/google/callback` aux URI de redirection autorisées (en local : `http://localhost/auth/google/callback`).
+- Définissez `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` et `GOOGLE_REDIRECT_URI` dans l’environnement de l’application. Le bouton Google apparaît sur les pages de connexion et d’inscription lorsque les deux identifiants sont configurés.
+- Exécutez `php artisan migrate --force` en production pour ajouter l’identifiant Google aux comptes. Les adresses Google doivent être vérifiées ; une adresse déjà présente est associée au compte correspondant.
+- Le numéro de téléphone est obligatoire lors du paiement et est enregistré avec le compte et l’adresse de livraison de la commande.
+
 # Lien de stockage
 
 > ⚠️ N’oubliez pas de créer le lien vers le stockage public en exécutant `php artisan storage:link` après avoir migré et ajouté le champ image_path.

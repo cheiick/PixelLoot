@@ -7,7 +7,7 @@
 
         <div class="bg-white shadow rounded p-6 mb-6">
             <h2 class="text-xl font-semibold mb-3">{{ __('Adresse de livraison') }}</h2>
-            <p>{{ $order->address }}</p>
+            <p class="whitespace-pre-line">{{ $order->address }}</p>
         </div>
 
         <div class="bg-white shadow rounded p-6 mb-6">
@@ -49,13 +49,13 @@
                         </tr>
                     @endif
                     <tr>
-                        <td colspan="3" class="px-4 py-2 font-semibold text-right">{{ __('Total payé :') }}</td>
+                        <td colspan="3" class="px-4 py-2 font-semibold text-right">{{ $order->status === 'paid' ? __('Total payé :') : __('Total de la commande :') }}</td>
                         <td class="px-4 py-2 font-semibold text-right">@money($order->total, $order->currency_code, $order->currency_symbol)</td>
                     </tr>
                 </tbody>
             </table>
             </div>
-            <p class="text-right font-medium">{{ __('Statut :') }} {{ ucfirst($order->status) }}</p>
+            <p class="text-right font-medium">{{ __('Statut :') }} {{ $order->status === 'paid' ? __('Payée') : ($order->status === 'pending' ? __('En attente de paiement') : ucfirst($order->status)) }}</p>
         </div>
 
         <a href="{{ route('home') }}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">{{ __('Retour aux produits') }}</a>

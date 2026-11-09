@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Checkout\ProcessCheckoutAction;
+use App\Http\Requests\StoreCheckoutRequest;
 use App\Models\Coupon;
 use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\OrderStatusNotifier;
 use App\Services\StripeCheckoutGateway;
-use App\Support\CurrencyFormatter;
 use App\Support\ImageStorage;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Validation\ValidationException;
-use Stripe\Exception\InvalidRequestException;
 
 class CheckoutController extends Controller
 {
@@ -55,142 +53,53 @@ class CheckoutController extends Controller
             }
         }
 
+        $nameParts = preg_split('/\s+/', trim(auth()->user()->name), 2) ?: [];
+
         return view('checkout.show', [
             'cart' => $cart,
             'subtotal' => $subtotal,
             'coupon' => $coupon,
             'discount' => $discount,
             'total' => $subtotal - $discount,
+            'defaultFirstName' => $nameParts[0] ?? '',
+            'defaultLastName' => $nameParts[1] ?? '',
         ]);
     }
 
-    public function store(Request $request, StripeCheckoutGateway $paymentGateway)
+    public function store(
+        StoreCheckoutRequest $request,
+        ProcessCheckoutAction $processCheckout,
+        StripeCheckoutGateway $paymentGateway
+    ): RedirectResponse
     {
-        $validated = $request->validate([
-            'address' => ['required', 'string', 'max:2000'],
-        ]);
-
-        $cart = Session::get('cart', []);
-
-        if (! $cart) {
+        if (empty(session('cart', []))) {
             return redirect()->route('cart.index')->with('error', __('Votre panier est vide.'));
         }
 
-        $couponCode = Session::get('coupon_code');
-
-        try {
-            $result = DB::transaction(function () use ($cart, $couponCode, $validated, $paymentGateway) {
-                $currency = app(CurrencyFormatter::class);
-                $currencyCode = $currency->code();
-                $productIds = array_map('intval', array_keys($cart));
-                $products = Product::whereIn('id', $productIds)
-                    ->lockForUpdate()
-                    ->get()
-                    ->keyBy('id');
-                $cartTotal = 0;
-                $lineItems = [];
-
-                foreach ($cart as $productId => $item) {
-                    $product = $products->get((int) $productId);
-                    $quantity = is_array($item) ? (int) ($item['quantity'] ?? 0) : 0;
-
-                    if (! $product || $quantity < 1 || $quantity > $product->stock) {
-                        throw ValidationException::withMessages([
-                            'cart' => __('Un produit de votre panier n’est plus disponible dans la quantité demandée.'),
-                        ]);
-                    }
-
-                    $cartTotal += (float) $product->price * $quantity;
-                    $lineItems[] = [
-                        'price_data' => [
-                            'currency' => strtolower($currencyCode),
-                            'unit_amount' => $currency->minorUnits($product->price),
-                            'product_data' => ['name' => $product->name],
-                        ],
-                        'quantity' => $quantity,
-                    ];
-                }
-
-                $coupon = null;
-                $discount = 0;
-
-                if ($couponCode) {
-                    $coupon = Coupon::where('code', $couponCode)->lockForUpdate()->first();
-
-                    if (! $coupon || ! $coupon->isAvailableFor($cartTotal)) {
-                        throw ValidationException::withMessages([
-                            'coupon_code' => __('Ce code promo n’est plus valide pour ce panier.'),
-                        ]);
-                    }
-
-                    $discount = $coupon->discountFor($cartTotal);
-                }
-
-                $order = Order::create([
-                    'user_id' => auth()->id(),
-                    'total' => $cartTotal - $discount,
-                    'coupon_code' => $coupon?->code,
-                    'discount_amount' => $discount,
-                    'currency_code' => $currencyCode,
-                    'currency_symbol' => $currency->symbol(),
-                    'status' => 'pending',
-                    'address' => $validated['address'],
-                ]);
-
-                foreach ($cart as $productId => $item) {
-                    $product = $products->get((int) $productId);
-                    $quantity = (int) $item['quantity'];
-
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $product->id,
-                        'quantity' => $quantity,
-                        'price' => $product->price,
-                    ]);
-
-                    $product->decrement('stock', $quantity);
-                }
-
-                $checkoutUrl = $paymentGateway->createSession(
-                    $lineItems,
-                    route('checkout.confirmation', $order).'?session_id={CHECKOUT_SESSION_ID}',
-                    route('cart.index'),
-                    $coupon,
-                    $discount,
-                    $currencyCode,
-                    $order->id
-                );
-
-                return [
-                    'order' => $order,
-                    'checkout_url' => $checkoutUrl,
-                    'coupon' => $coupon,
-                ];
-            });
-        } catch (InvalidRequestException $exception) {
-            if (str_contains(strtolower($exception->getMessage()), 'total amount must convert to at least')) {
-                throw ValidationException::withMessages([
-                    'cart' => __('Stripe refuse ce montant car il est inférieur au minimum de paiement pour cette devise. Augmentez le total du panier ou choisissez une autre devise.'),
-                ]);
-            }
-
-            throw $exception;
-        }
-
-        if ($result['coupon']) {
-            $result['coupon']->increment('used_count');
-        }
-
-        Session::forget(['cart', 'coupon_code']);
-
-        return redirect()->away($result['checkout_url']);
+        return redirect()->away($processCheckout($request->validated(), $paymentGateway));
     }
 
-    public function confirmation(Order $order)
+    public function confirmation(Order $order, OrderStatusNotifier $notifier)
     {
         abort_unless($order->user_id === auth()->id(), 404);
 
         Session::forget(['cart', 'coupon_code']);
+
+        $sessionId = request()->query('session_id');
+        if ($sessionId && $order->status === 'pending' && config('services.stripe.secret')) {
+            try {
+                $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
+                $session = $stripe->checkout->sessions->retrieve($sessionId);
+
+                if (($session->payment_status ?? null) === 'paid'
+                    && (string) ($session->metadata->order_id ?? '') === (string) $order->id) {
+                    $order->update(['status' => 'paid']);
+                    $notifier->sendIfNeeded($order->fresh());
+                }
+            } catch (\Throwable $exception) {
+                // Si la récupération Stripe échoue (ex: mauvaise clé en test local), on ignore et on laisse le webhook
+            }
+        }
 
         return view('checkout.confirmation', ['order' => $order]);
     }

@@ -25,20 +25,20 @@ class OrderController extends Controller
      * Update the status of an order.
      */
     public function updateStatus(Request $request, Order $order, OrderStatusNotifier $notifier)
-{
-    $validated = $request->validate([
-        'status' => ['required', 'in:pending,paid,shipped,delivered'],
-    ]);
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'in:pending,paid,shipped,delivered'],
+        ]);
 
-    $statusChanged = $order->status !== $validated['status'];
-    $order->status = $validated['status'];
-    $order->save();
+        $statusChanged = $order->status !== $validated['status'];
+        $order->status = $validated['status'];
+        $order->save();
 
-    if ($statusChanged || ! $order->customer_status_emailed_at) {
-        $notifier->sendIfNeeded($order->fresh());
+        if ($statusChanged || ! $order->customer_status_emailed_at) {
+            $notifier->sendIfNeeded($order->fresh(), force: true);
+        }
+
+        return redirect()->route('admin.orders.index')
+            ->with('success', "Le statut de la commande #{$order->id} a été mis à jour.");
     }
-
-    return redirect()->route('admin.orders.index')
-    ->with('success', 'Statut de la commande mis à jour.');
-}
 }

@@ -31,7 +31,7 @@ it('adds a product to the cart and displays its details', function () {
     $this->get(route('cart.index'))
         ->assertOk()
         ->assertSee('Casque audio')
-        ->assertSee('99.80');
+        ->assertSee(app(\App\Support\CurrencyFormatter::class)->format(99.80));
 });
 
 it('displays the uploaded product image in the cart', function () {

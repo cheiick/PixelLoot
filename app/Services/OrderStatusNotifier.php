@@ -10,11 +10,11 @@ use Illuminate\Support\Facades\Mail;
 
 class OrderStatusNotifier
 {
-    public function sendIfNeeded(Order $order): void
+    public function sendIfNeeded(Order $order, bool $force = false): void
     {
         $order->loadMissing('user');
 
-        if ($order->customer_status_emailed_at || ! $order->user?->email) {
+        if ((! $force && $order->customer_status_emailed_at) || ! $order->user?->email) {
             return;
         }
 

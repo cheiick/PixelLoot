@@ -45,6 +45,8 @@
         </button>
     </form>
 
+    @include('auth.partials.google-button')
+
     @if(Route::has('register'))
         <p class="mt-7 border-t border-slate-100 pt-6 text-center text-sm text-slate-600">
             {{ __('Vous n’avez pas encore de compte ?') }}

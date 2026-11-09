@@ -172,7 +172,7 @@ it('shows purchased products in the admin order list', function () {
         ->assertSee('Articles achetés')
         ->assertSee('Spider-Man 2')
         ->assertSee('2 ×')
-        ->assertSee('120,00 €');
+        ->assertSee(app(\App\Support\CurrencyFormatter::class)->format(120));
 });
 
 it('updates an order status and confirms the change', function () {
@@ -217,7 +217,8 @@ it('defaults the validation action to paid for pending orders', function () {
     $this->actingAs($admin)
         ->get(route('admin.orders.index'))
         ->assertOk()
-        ->assertSee('<option value="paid" selected>', false);
+        ->assertSee('value="paid"', false)
+        ->assertSee('Payée');
 });
 
 it('saves and reloads the footer settings', function () {

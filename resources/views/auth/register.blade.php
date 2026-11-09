@@ -54,6 +54,8 @@
         </button>
     </form>
 
+    @include('auth.partials.google-button')
+
     <p class="mt-6 border-t border-slate-100 pt-5 text-center text-sm text-slate-600">
         {{ __('Vous avez déjà un compte ?') }}
         <a class="font-semibold text-blue-700 hover:text-blue-900" href="{{ route('login') }}">{{ __('Se connecter') }}</a>
