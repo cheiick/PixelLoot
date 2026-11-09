@@ -151,7 +151,7 @@
             </form>
         </div>
 
-        <div id="mobile-navigation" x-show="open" x-transition.origin.top x-cloak class="storefront-mobile-nav border-t px-4 py-3 xl:hidden sm:px-6">
+        <div id="mobile-navigation" x-show="open" x-transition.origin.top x-cloak class="storefront-mobile-nav max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain border-t px-4 py-3 pb-12 xl:hidden sm:px-6">
             <ul class="mx-auto max-w-7xl space-y-1">
                 <li>
                     <form action="{{ route('language.update') }}" method="POST" class="px-4 py-2">
@@ -163,33 +163,33 @@
                         </select>
                     </form>
                 </li>
-                <li><a @click="open = false" href="{{ route('home') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Accueil') }}</a></li>
-                <li><a @click="open = false" href="{{ route('catalog.index') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Catalogue') }}</a></li>
+                <li><a @click="open = false" href="{{ route('home') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-stone-100 hover:text-rose-600 dark:hover:bg-slate-800">{{ __('Accueil') }}</a></li>
+                <li><a @click="open = false" href="{{ route('catalog.index') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-stone-100 hover:text-rose-600 dark:hover:bg-slate-800">{{ __('Catalogue') }}</a></li>
                 <li class="px-4 pt-3 text-xs font-bold uppercase tracking-wider text-slate-500">{{ __('Catégories') }}</li>
                 @forelse($navigationCategories as $category)
-                    <li><a @click="open = false" href="{{ route('catalog.index', ['category' => $category->id]) }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ $category->name }}</a></li>
+                    <li><a @click="open = false" href="{{ route('catalog.index', ['category' => $category->id]) }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-stone-100 hover:text-rose-600 dark:hover:bg-slate-800">{{ $category->name }}</a></li>
                 @empty
-                    <li><a @click="open = false" href="{{ route('catalog.index') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Toutes les catégories') }}</a></li>
+                    <li><a @click="open = false" href="{{ route('catalog.index') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-stone-100 hover:text-rose-600 dark:hover:bg-slate-800">{{ __('Toutes les catégories') }}</a></li>
                 @endforelse
-                <li><a @click="open = false" href="{{ route('catalog.index', ['sort' => 'newest']) }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Nouveautés') }}</a></li>
-                <li><a @click="open = false" href="{{ route('pages.about') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('À propos') }}</a></li>
-                <li><a @click="open = false" href="{{ route('pages.contact') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Contact') }}</a></li>
+                <li><a @click="open = false" href="{{ route('catalog.index', ['sort' => 'newest']) }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-stone-100 hover:text-rose-600 dark:hover:bg-slate-800">{{ __('Nouveautés') }}</a></li>
+                <li><a @click="open = false" href="{{ route('pages.about') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-stone-100 hover:text-rose-600 dark:hover:bg-slate-800">{{ __('À propos') }}</a></li>
+                <li><a @click="open = false" href="{{ route('pages.contact') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-stone-100 hover:text-rose-600 dark:hover:bg-slate-800">{{ __('Contact') }}</a></li>
                 @auth
-                    <li><a @click="open = false" href="{{ route('dashboard') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Mon compte') }}</a></li>
-                    <li><a @click="open = false" href="{{ route('wishlist.index') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Ma wishlist') }}</a></li>
+                    <li><a @click="open = false" href="{{ route('dashboard') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-stone-100 hover:text-rose-600 dark:hover:bg-slate-800">{{ __('Mon compte') }}</a></li>
+                    <li><a @click="open = false" href="{{ route('wishlist.index') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-stone-100 hover:text-rose-600 dark:hover:bg-slate-800">{{ __('Ma wishlist') }}</a></li>
                     @if(auth()->user()->is_admin)
-                        <li><a @click="open = false" href="{{ route('admin.dashboard') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Administration') }}</a></li>
+                        <li><a @click="open = false" href="{{ route('admin.dashboard') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-stone-100 hover:text-rose-600 dark:hover:bg-slate-800">{{ __('Administration') }}</a></li>
                     @endif
                     <li>
                         <form method="POST" action="{{ route('logout') }}" class="px-4 py-2">
                             @csrf
-                            <button type="submit" class="font-medium text-red-300 transition hover:text-red-200">{{ __('Déconnexion') }}</button>
+                            <button type="submit" class="font-medium text-red-600 transition hover:text-red-800 dark:text-red-400">{{ __('Déconnexion') }}</button>
                         </form>
                     </li>
                 @else
-                    <li><a @click="open = false" href="{{ route('login') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Se connecter') }}</a></li>
+                    <li><a @click="open = false" href="{{ route('login') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-stone-100 hover:text-rose-600 dark:hover:bg-slate-800">{{ __('Se connecter') }}</a></li>
                     @if(Route::has('register'))
-                        <li><a @click="open = false" href="{{ route('register') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-slate-800 hover:text-blue-300">{{ __('Créer un compte') }}</a></li>
+                        <li><a @click="open = false" href="{{ route('register') }}" class="block rounded-lg px-4 py-3 font-medium transition hover:bg-stone-100 hover:text-rose-600 dark:hover:bg-slate-800">{{ __('Créer un compte') }}</a></li>
                     @endif
                 @endauth
             </ul>
