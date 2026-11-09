@@ -38,6 +38,7 @@ class StoreCheckoutRequest extends FormRequest
                 Rule::unique('users', 'phone')->ignore($this->user()->id),
             ],
             'coupon_code' => ['bail', 'nullable', 'string', 'max:50', 'exists:coupons,code'],
+            'payment_method' => ['sometimes', 'string', 'in:stripe,fedapay'],
         ];
     }
 

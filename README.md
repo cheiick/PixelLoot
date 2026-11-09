@@ -17,7 +17,14 @@
 3. Dans Render, ajoutez `STRIPE_WEBHOOK_SECRET` avec le secret de signature du webhook Stripe. Configurez dans Stripe un webhook vers `https://<votre-domaine>/stripe/webhook` pour les événements `checkout.session.completed` et `checkout.session.async_payment_succeeded`.
 4. Appliquez les migrations de production avec `php artisan migrate --force`. Le démarrage du conteneur Render exécute aussi les migrations ; une migration resynchronise les séquences d’identifiants PostgreSQL avec les données existantes pour éviter les erreurs de clé primaire en double.
 
-Le reçu e-mail est envoyé à l’adresse du compte après confirmation du paiement par Stripe. Les changements de statut effectués par un administrateur déclenchent également un e-mail lorsqu’une adresse est disponible. L’URL de retour du client ne suffit pas à valider un paiement.
+Le reçu e-mail est envoyé à l’adresse du compte après confirmation du paiement par Stripe ou FedaPay. Les changements de statut effectués par un administrateur déclenchent également un e-mail lorsqu’une adresse est disponible. L’URL de retour du client ne suffit pas à valider un paiement.
+
+## Paiements FedaPay
+
+- Dans l’environnement (par exemple Render), configurez `FEDAPAY_SECRET_KEY` avec la clé secrète de test ou live du tableau de bord FedaPay. Ne la publiez jamais.
+- `FEDAPAY_BASE_URL` vaut par défaut `https://sandbox-api.fedapay.com/v1`. Pour les paiements réels, définissez-la sur `https://api.fedapay.com/v1` et utilisez la clé live correspondante.
+- FedaPay est proposé au checkout uniquement lorsque la devise de la boutique est XOF et que la clé secrète est configurée. Configurez un webhook vers `https://<votre-domaine>/fedapay/webhook`, sélectionnez l’événement `transaction.approved` et ajoutez sa clé de signature dans `FEDAPAY_WEBHOOK_SECRET`.
+- Le retour client et le webhook récupèrent la transaction auprès de l’API FedaPay et vérifient son statut, son montant et sa commande avant de marquer celle-ci comme payée.
 
 # Envoi d’e-mails avec Mailtrap
 

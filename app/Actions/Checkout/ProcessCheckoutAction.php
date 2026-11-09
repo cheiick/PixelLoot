@@ -6,6 +6,7 @@ use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\FedaPayCheckoutGateway;
 use App\Services\StripeCheckoutGateway;
 use App\Support\CurrencyFormatter;
 use Illuminate\Support\Facades\DB;
@@ -19,13 +20,26 @@ class ProcessCheckoutAction
      * Exécute le processus de checkout.
      *
      * @param  array<string, mixed>  $data
-     * @return string Stripe Checkout URL
+     * @return string External checkout URL
      *
      * @throws \Throwable
      */
-    public function __invoke(array $data, StripeCheckoutGateway $paymentGateway): string
+    public function __invoke(
+        array $data,
+        StripeCheckoutGateway $stripeGateway,
+        FedaPayCheckoutGateway $fedaPayGateway
+    ): string
     {
         $cart = session()->get('cart', []);
+        $paymentMethod = $data['payment_method'] ?? 'stripe';
+        $currencyCode = app(CurrencyFormatter::class)->code();
+
+        if ($paymentMethod === 'fedapay'
+            && (! config('services.fedapay.secret') || $currencyCode !== 'XOF')) {
+            throw ValidationException::withMessages([
+                'payment_method' => __('FedaPay nécessite une clé API configurée et une boutique en XOF.'),
+            ]);
+        }
 
         if (empty($cart)) {
             throw ValidationException::withMessages([
@@ -34,7 +48,7 @@ class ProcessCheckoutAction
         }
 
         try {
-            $result = DB::transaction(function () use ($cart, $data, $paymentGateway) {
+            $result = DB::transaction(function () use ($cart, $data, $paymentMethod, $stripeGateway, $fedaPayGateway) {
                 $currency = app(CurrencyFormatter::class);
                 $currencyCode = $currency->code();
                 $products = Product::whereIn('id', array_map('intval', array_keys($cart)))
@@ -122,15 +136,22 @@ class ProcessCheckoutAction
                     $product->decrement('stock', $quantity);
                 }
 
-                $checkoutUrl = $paymentGateway->createSession(
-                    $lineItems,
-                    route('checkout.confirmation', $order).'?session_id={CHECKOUT_SESSION_ID}',
-                    route('cart.index'),
-                    $coupon,
-                    $discount,
-                    $currencyCode,
-                    $order->id
-                );
+                $checkoutUrl = $paymentMethod === 'fedapay'
+                    ? $fedaPayGateway->createCheckoutUrl(
+                        $order,
+                        $data['first_name'],
+                        $data['last_name'],
+                        $data['email']
+                    )
+                    : $stripeGateway->createSession(
+                        $lineItems,
+                        route('checkout.confirmation', $order).'?session_id={CHECKOUT_SESSION_ID}',
+                        route('cart.index'),
+                        $coupon,
+                        $discount,
+                        $currencyCode,
+                        $order->id
+                    );
 
                 return ['checkout_url' => $checkoutUrl, 'coupon' => $coupon];
             });

@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\SiteSetting;
 use App\Models\User;
 use App\Services\StripeCheckoutGateway;
+use Illuminate\Support\Facades\Http;
 use Stripe\Exception\InvalidRequestException;
 
 it('requires a phone number before starting checkout', function () {
@@ -300,4 +301,152 @@ it('explains Stripe minimum amount errors and keeps the cart without creating an
 
     expect(Order::count())->toBe(0)
         ->and($product->fresh()->stock)->toBe(5);
+});
+
+it('starts FedaPay checkout in XOF and confirms the order from the trusted transaction API', function () {
+    config([
+        'services.fedapay.secret' => 'sk_sandbox_test',
+        'services.fedapay.base_url' => 'https://sandbox-api.fedapay.com/v1',
+    ]);
+    SiteSetting::updateOrCreate(['key' => 'currency_code'], ['value' => 'XOF']);
+    SiteSetting::updateOrCreate(['key' => 'currency_symbol'], ['value' => 'FCFA']);
+
+    $category = Category::create(['name' => 'Électronique', 'slug' => 'electronique']);
+    $product = Product::create([
+        'category_id' => $category->id,
+        'name' => 'Casque audio',
+        'slug' => 'casque-audio',
+        'price' => 1250,
+        'stock' => 5,
+    ]);
+    $user = User::factory()->create();
+
+    Http::fake([
+        'sandbox-api.fedapay.com/v1/transactions' => Http::response([
+            'id' => 987,
+            'status' => 'pending',
+        ], 201),
+        'sandbox-api.fedapay.com/v1/transactions/987/token' => Http::response([
+            'url' => 'https://checkout.fedapay.com/token/example',
+        ]),
+        'sandbox-api.fedapay.com/v1/transactions/987' => fn () => Http::response([
+            'id' => 987,
+            'status' => 'approved',
+            'amount' => 1250,
+            'currency' => ['iso' => 'XOF'],
+            'custom_metadata' => ['order_id' => (string) Order::firstOrFail()->id],
+        ]),
+    ]);
+
+    $this->actingAs($user)
+        ->withSession(['cart' => [
+            $product->id => ['name' => $product->name, 'price' => $product->price, 'quantity' => 1],
+        ]])
+        ->get(route('checkout.show'))
+        ->assertOk()
+        ->assertSee('FedaPay');
+
+    $this->post(route('checkout.store'), [
+        'email' => 'buyer@example.test',
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'phone' => '+221 77 000 00 00',
+        'address' => '10 rue de Dakar',
+        'city' => 'Dakar',
+        'postal_code' => '10000',
+        'country' => 'Sénégal',
+        'payment_method' => 'fedapay',
+    ])->assertRedirect('https://checkout.fedapay.com/token/example');
+
+    $order = Order::firstOrFail();
+    Http::assertSent(fn ($request) => $request->url() === 'https://sandbox-api.fedapay.com/v1/transactions'
+        && $request['amount'] === 1250
+        && $request['currency']['iso'] === 'XOF'
+        && $request['custom_metadata']['order_id'] === (string) $order->id
+        && $request->hasHeader('Authorization', 'Bearer sk_sandbox_test'));
+
+    $this->get(route('fedapay.return', ['id' => 987]))
+        ->assertRedirect(route('checkout.confirmation', $order));
+
+    expect($order->fresh()->status)->toBe('paid')
+        ->and($product->fresh()->stock)->toBe(4);
+});
+
+it('validates FedaPay webhook signatures and reconciles approved transactions with the API', function () {
+    config([
+        'services.fedapay.secret' => 'sk_sandbox_test',
+        'services.fedapay.webhook_secret' => 'wh_sandbox_test',
+        'services.fedapay.base_url' => 'https://sandbox-api.fedapay.com/v1',
+    ]);
+
+    $customer = User::factory()->create();
+    $order = Order::create([
+        'user_id' => $customer->id,
+        'total' => 1250,
+        'currency_code' => 'XOF',
+        'status' => 'pending',
+        'address' => 'Dakar',
+    ]);
+    $payload = json_encode([
+        'name' => 'transaction.approved',
+        'object_id' => 987,
+    ], JSON_THROW_ON_ERROR);
+    $timestamp = now()->timestamp;
+    $signature = hash_hmac('sha256', $timestamp.'.'.$payload, 'wh_sandbox_test');
+
+    Http::fake([
+        'sandbox-api.fedapay.com/v1/transactions/987' => Http::response([
+            'id' => 987,
+            'status' => 'approved',
+            'amount' => 1250,
+            'currency' => ['iso' => 'XOF'],
+            'custom_metadata' => ['order_id' => (string) $order->id],
+        ]),
+    ]);
+
+    $this->call('POST', route('fedapay.webhook'), [], [], [], [
+        'CONTENT_TYPE' => 'application/json',
+        'HTTP_X_FEDAPAY_SIGNATURE' => "t={$timestamp},s={$signature}",
+    ], $payload)->assertOk();
+
+    expect($order->fresh()->status)->toBe('paid');
+
+    $this->call('POST', route('fedapay.webhook'), [], [], [], [
+        'CONTENT_TYPE' => 'application/json',
+        'HTTP_X_FEDAPAY_SIGNATURE' => 't='.$timestamp.',s=invalid',
+    ], $payload)->assertStatus(400);
+});
+
+it('rejects FedaPay checkout when the configured currency is not XOF', function () {
+    config(['services.fedapay.secret' => 'sk_sandbox_test']);
+    $category = Category::create(['name' => 'Électronique', 'slug' => 'electronique']);
+    $product = Product::create([
+        'category_id' => $category->id,
+        'name' => 'Casque audio',
+        'slug' => 'casque-audio',
+        'price' => 10,
+        'stock' => 5,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->withSession(['cart' => [
+            $product->id => ['name' => $product->name, 'price' => $product->price, 'quantity' => 1],
+        ]])
+        ->from(route('checkout.show'))
+        ->post(route('checkout.store'), [
+            'email' => 'buyer@example.test',
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
+            'phone' => '+33 6 12 34 56 78',
+            'address' => '10 rue de Paris',
+            'city' => 'Paris',
+            'postal_code' => '75001',
+            'country' => 'France',
+            'payment_method' => 'fedapay',
+        ])
+        ->assertRedirect(route('checkout.show'))
+        ->assertSessionHasErrors('payment_method')
+        ->assertSessionHas('cart');
+
+    expect(Order::count())->toBe(0);
 });

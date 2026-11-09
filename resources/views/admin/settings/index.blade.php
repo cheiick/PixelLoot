@@ -40,7 +40,7 @@
                     <input type="text" id="currency_symbol" name="currency_symbol" value="{{ old('currency_symbol', $settings['currency_symbol']) }}" required maxlength="8" class="w-full border rounded px-3 py-2">
                 </div>
             </div>
-            <p class="text-sm text-gray-600">La devise choisie sera utilisée dans les prix affichés et pour le paiement Stripe. Les montants des produits ne sont pas convertis automatiquement : ajustez-les si nécessaire. Vérifiez aussi que votre compte Stripe accepte cette devise.</p>
+            <p class="text-sm text-gray-600">La devise choisie sera utilisée dans les prix affichés et pour le paiement Stripe. FedaPay est également proposé lorsque la boutique est en XOF. Les montants des produits ne sont pas convertis automatiquement : ajustez-les si nécessaire. Vérifiez aussi que votre compte Stripe accepte cette devise.</p>
             <div>
                 <label for="site_name" class="block text-sm font-medium mb-1">Nom du site</label>
                 <input type="text" id="site_name" name="site_name" value="{{ old('site_name', $settings['site_name']) }}" required maxlength="255" class="w-full border rounded px-3 py-2">
@@ -94,7 +94,7 @@
             <legend class="text-lg font-semibold mb-3">E-mails de commande et newsletter</legend>
             <p class="text-sm text-gray-600">
                 Activez l’envoi et configurez Mailtrap Email Sending API dans le serveur ou renseignez un fournisseur SMTP ci-dessous.
-                Après confirmation du paiement Stripe, le client reçoit le détail de sa commande ; les changements de statut et les inscriptions à la newsletter envoient également un e-mail.
+                Après confirmation du paiement par Stripe ou FedaPay, le client reçoit le détail de sa commande ; les changements de statut et les inscriptions à la newsletter envoient également un e-mail.
                 Les identifiants SMTP sont chiffrés en base et le mot de passe n’est jamais réaffiché.
             </p>
             @if(config('services.mailtrap.token'))

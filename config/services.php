@@ -41,6 +41,12 @@ return [
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
+    'fedapay' => [
+        'secret' => env('FEDAPAY_SECRET_KEY'),
+        'webhook_secret' => env('FEDAPAY_WEBHOOK_SECRET'),
+        'base_url' => env('FEDAPAY_BASE_URL', 'https://sandbox-api.fedapay.com/v1'),
+    ],
+
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),

@@ -61,6 +61,26 @@
                     </div>
 
                     <div class="grid gap-x-5 gap-y-5 sm:grid-cols-2">
+                        <fieldset class="sm:col-span-2">
+                            <legend class="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-200">{{ __('Mode de paiement') }} <span class="text-rose-600">*</span></legend>
+                            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-stone-200 p-4 dark:border-slate-700">
+                                <input type="radio" name="payment_method" value="stripe" required @checked(old('payment_method', 'stripe') === 'stripe') class="mt-1 accent-rose-600">
+                                <span>
+                                    <span class="block font-bold text-slate-900 dark:text-white">Stripe</span>
+                                    <span class="block text-sm text-slate-500 dark:text-slate-400">{{ __('Carte bancaire') }}</span>
+                                </span>
+                            </label>
+                            @if($fedaPayAvailable)
+                                <label class="mt-3 flex cursor-pointer items-start gap-3 rounded-xl border border-stone-200 p-4 dark:border-slate-700">
+                                    <input type="radio" name="payment_method" value="fedapay" required @checked(old('payment_method') === 'fedapay') class="mt-1 accent-rose-600">
+                                    <span>
+                                        <span class="block font-bold text-slate-900 dark:text-white">FedaPay</span>
+                                        <span class="block text-sm text-slate-500 dark:text-slate-400">{{ __('Mobile Money et autres moyens disponibles (XOF)') }}</span>
+                                    </span>
+                                </label>
+                            @endif
+                            @error('payment_method')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </fieldset>
                         <div class="sm:col-span-2">
                             <label for="email" class="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-200">{{ __('Adresse e-mail') }} <span class="text-rose-600">*</span></label>
                             <input id="email" name="email" type="email" required maxlength="255" autocomplete="email" value="{{ old('email', auth()->user()->email) }}" placeholder="vous@exemple.fr" class="min-h-12 w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-rose-500 focus:bg-white focus:ring-4 focus:ring-rose-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:bg-slate-900">
@@ -112,7 +132,7 @@
                     </div>
 
                     <p class="mt-7 border-t border-stone-100 pt-5 text-xs leading-5 text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                        {{ __('En continuant, vous serez redirigé vers notre prestataire de paiement sécurisé Stripe.') }}
+                        {{ __('En continuant, vous serez redirigé vers le prestataire de paiement sélectionné.') }}
                     </p>
                 </form>
 
@@ -167,7 +187,7 @@
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" stroke-width="1.8"/><path stroke-linecap="round" stroke-width="1.8" d="M3 10h18m-14 5h4"/></svg>
                             {{ __('Payer en toute sécurité') }}
                         </button>
-                        <p class="mt-3 text-center text-xs text-slate-500 dark:text-slate-400">{{ __('Paiement chiffré et sécurisé par Stripe') }}</p>
+                        <p class="mt-3 text-center text-xs text-slate-500 dark:text-slate-400">{{ __('Paiement chiffré et sécurisé par notre prestataire de paiement') }}</p>
                     </section>
 
                     <section class="storefront-form-card p-5 dark:bg-slate-900 sm:p-6">

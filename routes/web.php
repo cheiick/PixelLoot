@@ -31,6 +31,7 @@ Route::get('/newsletter/unsubscribe/{token}', [NewsletterController::class, 'uns
 Route::get('/legal', function () { return view('pages.legal'); })->name('pages.legal');
 Route::post('/language', [LanguageController::class, 'update'])->name('language.update');
 Route::post('/stripe/webhook', StripeWebhookController::class)->name('stripe.webhook');
+Route::post('/fedapay/webhook', [CheckoutController::class, 'fedapayWebhook'])->name('fedapay.webhook');
 // Product detail
 Route::get('/products/{product}', [ProductController::class, 'show'])
     ->name('products.show');
@@ -65,6 +66,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
     Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:5,1')->name('checkout.store');
     Route::get('/confirmation/{order}', [CheckoutController::class, 'confirmation'])->name('checkout.confirmation');
+    Route::get('/fedapay/return', [CheckoutController::class, 'fedapayReturn'])->name('fedapay.return');
 });
 
 // Admin routes
